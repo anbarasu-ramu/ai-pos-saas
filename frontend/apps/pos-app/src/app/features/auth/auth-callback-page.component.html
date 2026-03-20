@@ -1,0 +1,10 @@
+<section class="page card">
+  <p class="eyebrow">Authentication</p>
+  <h2>{{ title }}</h2>
+  <p>{{ message }}</p>
+
+  @if (errorMessage) {
+    <div class="error">{{ errorMessage }}</div>
+    <a routerLink="/login">Return to login</a>
+  }
+</section>

@@ -9,12 +9,28 @@
     </div>
 
     <nav class="nav">
-      @for (item of navItems; track item.path) {
+      @for (item of visibleNavItems(); track item.path) {
         <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           {{ item.label }}
         </a>
       }
     </nav>
+
+    @if (session(); as activeSession) {
+      <section class="session-card">
+        <p class="session-label">Signed in</p>
+        @if (activeSession.username || activeSession.email) {
+          <strong>{{ activeSession.username || activeSession.email }}</strong>
+        }
+        @if (activeSession.email) {
+          <p class="session-meta">{{ activeSession.email }}</p>
+        }
+        @if (activeSession.tenantId) {
+          <p class="session-meta">Tenant: {{ activeSession.tenantId }}</p>
+        }
+        <button type="button" (click)="logout()">Logout</button>
+      </section>
+    }
   </aside>
 
   <main class="content">

@@ -19,7 +19,6 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 
 ### Still In Progress
 
-- Frontend callback/token exchange flow after Keycloak login
 - Full domain CRUD and validation rules
 - Tenant isolation enforcement across all queries and writes
 - Ollama integration and structured tool-calling pipeline
@@ -66,10 +65,12 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 - Tenant identity is expected to arrive through JWT claims such as `tenant_id`
 - Local development imports a predefined `ai-pos` realm with `TENANT_ADMIN` and `CASHIER` roles
 - A public `pos-client` client is used for browser login during local development
+- The frontend now completes the Keycloak OIDC Authorization Code Flow with PKCE, stores tokens in `sessionStorage`, restores client-side session state on reload, and attaches bearer tokens to backend API requests
 - The backend provisions the first tenant administrator through a confidential `pos-admin-service` client using Keycloak Admin REST APIs
 - Registration is app-managed: the backend creates the tenant record first, then provisions the Keycloak user, password, tenant attribute, and realm role
 - Duplicate store names are rejected instead of being auto-suffixed
 - Registration compensation now removes a partially created Keycloak user if a later provisioning step fails, to avoid split-brain state between Postgres and Keycloak
+- The backend exposes `/api/auth/me` so the frontend can hydrate authenticated user profile, roles, and tenant context from the validated JWT
 
 ### Multi-Tenancy
 
@@ -102,7 +103,7 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 | Area | Status | Notes |
 |---|---|---|
 | Infrastructure | In progress | Compose is scaffolded and validated; full end-to-end container bring-up still needs final verification |
-| Authentication | In progress | Tenant bootstrap registration, Keycloak admin provisioning, and env-driven login URLs now exist; callback/token handling is still pending |
+| Authentication | Completed for AUTH-2 | Tenant bootstrap registration, Keycloak admin provisioning, SPA PKCE login, callback/token handling, backend JWT validation, and `/api/auth/me` session hydration now exist; refresh flow is still intentionally deferred |
 | Multi-tenancy | In progress | Base tenant-aware entity pattern plus tenant UUID business id now exist; enforcement across all reads and writes is still partial |
 | Inventory | In progress | Product and stock schemas/entities exist; CRUD logic is not complete |
 | Orders | In progress | Order scaffolding exists; checkout workflow is not implemented |
@@ -117,9 +118,9 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 
 ## Next Build Steps
 
-1. Complete frontend callback handling and token storage/refresh flow after successful Keycloak login.
-2. Add integration tests for registration success, duplicate store rejection, duplicate user rejection, and compensation behavior.
-3. Implement product, stock, and order CRUD with tenant-aware validation.
-4. Add Ollama client integration and structured AI action parsing.
-5. Introduce service-layer guardrails and audit logging.
-6. Connect the remaining frontend feature pages to real backend APIs.
+1. Add integration tests for registration success, duplicate store rejection, duplicate user rejection, and compensation behavior.
+2. Implement product, stock, and order CRUD with tenant-aware validation.
+3. Add Ollama client integration and structured AI action parsing.
+4. Introduce service-layer guardrails and audit logging.
+5. Connect the remaining frontend feature pages to real backend APIs.
+6. Add refresh-token handling and token renewal for AUTH-8.

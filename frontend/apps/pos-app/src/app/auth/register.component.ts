@@ -85,7 +85,7 @@ export class RegisterComponent {
       this.successMessage = response.message;
       this.isSubmitting = false;
       window.setTimeout(() => {
-        window.location.href = response.loginUrl || this.authService.buildLoginRedirectUrl();
+        void this.authService.login(response.email);
       }, 800);
     } catch (error: any) {
       this.isSubmitting = false;

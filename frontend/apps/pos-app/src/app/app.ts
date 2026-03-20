@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from './auth/auth.service';
 
 @Component({
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
@@ -8,7 +9,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   styleUrl: './app.css',
 })
 export class App {
-  protected readonly navItems = [
+  private readonly authService = inject(AuthService);
+
+  private readonly navItems = [
     { label: 'Dashboard', path: '/dashboard' },
     { label: 'Products', path: '/products' },
     { label: 'Cart', path: '/cart' },
@@ -17,4 +20,23 @@ export class App {
     { label: 'Login', path: '/login' },
     { label: 'Register', path: '/register' },
   ];
+
+  protected visibleNavItems() {
+    const authenticated = !!this.session();
+    return this.navItems.filter((item) => {
+      if (authenticated && (item.path === '/login' || item.path === '/register')) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  protected session() {
+    return this.authService.currentSession();
+  }
+
+  protected logout(): void {
+    this.authService.logout();
+  }
 }
