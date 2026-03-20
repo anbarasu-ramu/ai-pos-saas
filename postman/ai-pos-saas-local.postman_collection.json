@@ -65,6 +65,34 @@
           }
         },
         {
+          "name": "Register Tenant Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"owner+{{$timestamp}}@example.com\",\n  \"password\": \"Password1\",\n  \"tenantName\": \"Anbu Store\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Public registration endpoint that creates a tenant plus the first tenant administrator in Keycloak."
+          }
+        },
+        {
           "name": "List Products",
           "request": {
             "auth": {

@@ -15,5 +15,6 @@ export class App {
     { label: 'Checkout', path: '/checkout' },
     { label: 'AI Assistant', path: '/ai-assistant' },
     { label: 'Login', path: '/login' },
+    { label: 'Register', path: '/register' },
   ];
 }

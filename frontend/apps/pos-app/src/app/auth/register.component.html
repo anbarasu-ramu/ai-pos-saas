@@ -1,0 +1,35 @@
+<section class="page card">
+  <p class="eyebrow">Tenant bootstrap</p>
+  <h2>Create your store workspace</h2>
+  <p>
+    Register your store, provision the first tenant administrator, and continue to Keycloak login.
+  </p>
+
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label>
+      Email
+      <input type="email" formControlName="email" placeholder="owner@store.com" />
+      <span class="field-error" *ngIf="showError('email')">{{ fieldError('email') }}</span>
+    </label>
+    <label>
+      Password
+      <input type="password" formControlName="password" placeholder="Strong password" />
+      <span class="hint">Use at least 8 characters with upper, lower, and a number.</span>
+      <span class="field-error" *ngIf="showError('password')">{{ fieldError('password') }}</span>
+    </label>
+    <label>
+      Tenant name
+      <input type="text" formControlName="tenantName" placeholder="My Store" />
+      <span class="field-error" *ngIf="showError('tenantName')">{{ fieldError('tenantName') }}</span>
+    </label>
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+
+    <button type="button" (click)="submit()" [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Provisioning...' : 'Create tenant admin' }}
+    </button>
+  </form>
+
+  <a routerLink="/login">Already registered? Continue to login</a>
+</section>

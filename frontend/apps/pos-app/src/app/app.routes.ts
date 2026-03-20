@@ -12,6 +12,11 @@ export const appRoutes: Route[] = [
       import('./features/auth/login-page.component').then((m) => m.LoginPageComponent),
   },
   {
+    path: 'register',
+    loadComponent: () =>
+      import('./auth/register.component').then((m) => m.RegisterComponent),
+  },
+  {
     path: 'dashboard',
     loadComponent: () =>
       import('./features/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
