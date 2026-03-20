@@ -1,0 +1,49 @@
+services:
+  postgres:
+    ports:
+      - "${POSTGRES_HOST_PORT}:5432"
+
+  keycloak:
+    command: start-dev --import-realm
+    ports:
+      - "${KEYCLOAK_PORT}:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./infra/keycloak/import:/opt/keycloak/data/import:ro
+
+  backend:
+    ports:
+      - "${BACKEND_PORT}:8080"
+
+  frontend:
+    ports:
+      - "${FRONTEND_PORT}:80"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "${PGADMIN_PORT}:80"
+    networks:
+      - ai-pos-network
+
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: unless-stopped
+    profiles: ["ai"]
+    ports:
+      - "${OLLAMA_PORT}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ai-pos-network
+
+volumes:
+  keycloak_data:
+  ollama_data:
+

@@ -1,6 +1,9 @@
 .DS_Store
 .continue/
 .vscode/
+.env
+.env.dev
+.env.prod
 
 backend/.idea/
 backend/.vscode/
