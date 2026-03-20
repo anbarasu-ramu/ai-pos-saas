@@ -22,3 +22,4 @@
 - Do not create a new project when updating an existing feature.
 - Keep task work isolated on a dedicated feature branch.
 - Verify changes locally before pushing when the task affects runtime behavior.
+- When opening a PR for an issue-backed task, include an auto-close keyword in the PR body, for example `Closes #9`.
