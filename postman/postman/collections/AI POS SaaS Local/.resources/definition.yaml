@@ -1,0 +1,7 @@
+$kind: collection
+description: Local development collection for the AI POS SaaS stack.
+variables:
+  baseUrl: http://localhost:8080
+  keycloakBaseUrl: http://localhost:8081
+  realm: ai-pos
+  bearerToken: ""

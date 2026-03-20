@@ -1,0 +1,130 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: ankane/pgvector:latest
+    container_name: pos-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pos
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d pos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - ai-pos-network
+
+  # ollama:
+  #   image: ollama/ollama
+  #   container_name: ollama
+  #   restart: unless-stopped
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   networks:
+  #     - ai-pos-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: keycloak
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8081:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./infra/keycloak/import:/opt/keycloak/data/import:ro
+    networks:
+      - ai-pos-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile_inline: |
+        FROM maven:3.9.9-eclipse-temurin-21 AS builder
+        WORKDIR /app
+        COPY pom.xml ./
+        COPY src ./src
+        RUN mvn clean package -DskipTests
+
+        FROM eclipse-temurin:21-jre
+        WORKDIR /app
+        COPY --from=builder /app/target/*.jar app.jar
+        EXPOSE 8080
+        ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+    container_name: pos-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pos
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: pass
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/ai-pos
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    ports:
+      - "8080:8080"
+    networks:
+      - ai-pos-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile_inline: |
+        FROM node:22-alpine AS builder
+        WORKDIR /app
+        COPY package.json package-lock.json ./
+        RUN npm install
+        COPY . .
+        RUN npx nx build pos-app
+
+        FROM nginx:1.27-alpine
+        COPY --from=builder /app/dist/apps/pos-app /usr/share/nginx/html
+        EXPOSE 80
+        CMD ["nginx", "-g", "daemon off;"]
+    container_name: pos-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "4200:80"
+    networks:
+      - ai-pos-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - ai-pos-network
+
+volumes:
+  pgdata:
+  ollama_data:
+  keycloak_data:
+
+networks:
+  ai-pos-network:
+    driver: bridge

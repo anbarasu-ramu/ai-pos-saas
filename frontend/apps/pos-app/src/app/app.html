@@ -1,0 +1,23 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div>
+      <p class="eyebrow">AI POS SaaS</p>
+      <h1>Store cockpit</h1>
+      <p class="subcopy">
+        Starter workspace for auth, catalog, checkout, and AI-assisted operations.
+      </p>
+    </div>
+
+    <nav class="nav">
+      @for (item of navItems; track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,0 +1,13 @@
+.DS_Store
+.continue/
+.vscode/
+
+backend/.idea/
+backend/.vscode/
+backend/target/
+
+frontend/.angular/
+frontend/.nx/
+frontend/.vscode/
+frontend/dist/
+frontend/node_modules/

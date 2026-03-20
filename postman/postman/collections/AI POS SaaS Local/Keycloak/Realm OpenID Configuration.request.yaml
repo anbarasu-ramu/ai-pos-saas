@@ -1,0 +1,5 @@
+$kind: http-request
+description: Inspect the Keycloak OIDC endpoints for the imported ai-pos realm.
+url: "{{keycloakBaseUrl}}/realms/{{realm}}/.well-known/openid-configuration"
+method: GET
+order: 1000
