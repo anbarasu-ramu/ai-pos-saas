@@ -1,20 +1,16 @@
-version: '3.9'
-
 services:
   postgres:
     image: ankane/pgvector:latest
     container_name: pos-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: pos
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d pos"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,31 +18,16 @@ services:
     networks:
       - ai-pos-network
 
-  # ollama:
-  #   image: ollama/ollama
-  #   container_name: ollama
-  #   restart: unless-stopped
-  #   ports:
-  #     - "11434:11434"
-  #   volumes:
-  #     - ollama_data:/root/.ollama
-  #   networks:
-  #     - ai-pos-network
-
   keycloak:
     image: quay.io/keycloak/keycloak:26.1
     container_name: keycloak
     restart: unless-stopped
-    command: start-dev --import-realm
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_HEALTH_ENABLED: "true"
-    ports:
-      - "8081:8080"
     volumes:
       - keycloak_data:/opt/keycloak/data
-      - ./infra/keycloak/import:/opt/keycloak/data/import:ro
     networks:
       - ai-pos-network
 
@@ -73,50 +54,31 @@ services:
       keycloak:
         condition: service_started
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pos
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: pass
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/ai-pos
-      OLLAMA_BASE_URL: http://host.docker.internal:11434
-    ports:
-      - "8080:8080"
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS}
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: ${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
     networks:
       - ai-pos-network
 
   frontend:
     build:
       context: ./frontend
-      dockerfile_inline: |
-        FROM node:22-alpine AS builder
-        WORKDIR /app
-        COPY package.json package-lock.json ./
-        RUN npm install
-        COPY . .
-        RUN npx nx build pos-app
-
-        FROM nginx:1.27-alpine
-        COPY --from=builder /app/dist/apps/pos-app /usr/share/nginx/html
-        EXPOSE 80
-        CMD ["nginx", "-g", "daemon off;"]
+      dockerfile: Dockerfile
     container_name: pos-frontend
     restart: unless-stopped
     depends_on:
       backend:
         condition: service_started
-    ports:
-      - "4200:80"
-    networks:
-      - ai-pos-network
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
+      API_BASE_URL: ${API_BASE_URL}
+      KEYCLOAK_BASE_URL: ${KEYCLOAK_BASE_URL}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
     networks:
       - ai-pos-network
 

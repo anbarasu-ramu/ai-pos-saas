@@ -1,0 +1,19 @@
+services:
+  postgres:
+    restart: always
+
+  keycloak:
+    command: start --http-enabled=true
+    restart: always
+    ports:
+      - "${KEYCLOAK_PORT}:8080"
+
+  backend:
+    restart: always
+    ports:
+      - "${BACKEND_PORT}:8080"
+
+  frontend:
+    restart: always
+    ports:
+      - "${FRONTEND_PORT}:80"

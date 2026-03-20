@@ -1,9 +1,5 @@
 import { Component } from '@angular/core';
-
-const KEYCLOAK_BASE_URL = 'http://localhost:8081';
-const REALM = 'ai-pos';
-const CLIENT_ID = 'pos-frontend';
-const REDIRECT_URI = 'http://127.0.0.1:4200/dashboard';
+import { getAppConfig } from '../../core/config/app-config';
 
 @Component({
   selector: 'app-login-page',
@@ -50,14 +46,17 @@ const REDIRECT_URI = 'http://127.0.0.1:4200/dashboard';
   `],
 })
 export class LoginPageComponent {
-  protected readonly realm = REALM;
-  protected readonly clientId = CLIENT_ID;
+  private readonly appConfig = getAppConfig();
+
+  protected readonly realm = this.appConfig.realm;
+  protected readonly clientId = this.appConfig.clientId;
 
   login(): void {
+    const redirectUri = `${window.location.origin}/dashboard`;
     const loginUrl =
-      `${KEYCLOAK_BASE_URL}/realms/${REALM}/protocol/openid-connect/auth` +
-      `?client_id=${encodeURIComponent(CLIENT_ID)}` +
-      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+      `${this.appConfig.keycloakBaseUrl}/realms/${this.appConfig.realm}/protocol/openid-connect/auth` +
+      `?client_id=${encodeURIComponent(this.appConfig.clientId)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
       `&response_type=code` +
       `&scope=${encodeURIComponent('openid profile email')}`;
 

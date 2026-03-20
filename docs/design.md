@@ -9,6 +9,7 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 ### Completed Foundation
 
 - Docker Compose scaffolding for PostgreSQL with pgvector, Ollama, Keycloak, backend, frontend, and pgAdmin
+- Environment-based config split for dev/prod Compose, Spring profiles, and frontend runtime settings
 - Spring Boot backend entrypoint and package structure
 - Angular Nx frontend app renamed and scaffolded as `pos-app`
 - Flyway baseline migration with tenant, product, order, stock, audit, and RAG placeholder tables
@@ -94,8 +95,8 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 
 | Area | Status | Notes |
 |---|---|---|
-| Infrastructure | In progress | Compose is scaffolded and validated; full end-to-end container bring-up still needs final verification |
-| Authentication | In progress | Realm import, users, roles, client setup, and backend JWT role mapping now exist; frontend callback handling is still pending |
+| Infrastructure | In progress | Compose now supports shared plus dev/prod overrides; end-to-end verification for both modes is still in progress |
+| Authentication | In progress | Realm import, users, roles, client setup, backend JWT role mapping, and env-driven frontend auth URLs now exist; callback handling is still pending |
 | Multi-tenancy | In progress | Base tenant-aware entity pattern exists; enforcement is still partial |
 | Inventory | In progress | Product and stock schemas/entities exist; CRUD logic is not complete |
 | Orders | In progress | Order scaffolding exists; checkout workflow is not implemented |
@@ -107,6 +108,15 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 | RAG | Not started | Placeholder tables exist; ingestion and retrieval are pending |
 | Observability | Not started | Logging/audit strategy still needs implementation |
 | Testing | In progress | Frontend build and backend compile/test pass; feature tests are still missing |
+
+## Environment Configuration
+
+- Shared service wiring lives in `docker-compose.yml`
+- Development-only ports, realm import, pgAdmin, and optional Ollama live in `docker-compose.dev.yml`
+- Production-oriented runtime overrides live in `docker-compose.prod.yml`
+- Spring Boot uses `dev` and `prod` profiles with environment variables controlling datasource, issuer, CORS, actuator exposure, and Ollama endpoint
+- The Angular frontend reads build-time defaults and merges them with a runtime `window.__APP_CONFIG__` payload so Docker deployments can change URLs without rebuilding assets
+- Secrets management still relies on local env files and deployment environment variables; external secret stores remain out of scope for this phase
 
 ## Next Build Steps
 

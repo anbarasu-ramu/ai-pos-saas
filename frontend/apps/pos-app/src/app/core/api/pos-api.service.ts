@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { getAppConfig } from '../config/app-config';
 import {
   AiSuggestion,
   CartLine,
@@ -8,6 +9,12 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class PosApiService {
+  private readonly appConfig = getAppConfig();
+
+  getAuthStatusUrl(): string {
+    return `${this.appConfig.apiBaseUrl}/api/auth/status`;
+  }
+
   getDashboardMetrics(): MetricCard[] {
     return [
       { label: 'Sales Today', value: '$4,820', trend: '+12% vs yesterday' },
