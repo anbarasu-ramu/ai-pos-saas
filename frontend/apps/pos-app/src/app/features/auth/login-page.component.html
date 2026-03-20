@@ -1,0 +1,23 @@
+<section class="page card">
+  <p class="eyebrow">Authentication</p>
+  <h2>Log in to your tenant workspace</h2>
+  <p>
+    Sign in with the tenant admin account created during registration.
+  </p>
+
+  <form class="form" [formGroup]="form" (ngSubmit)="login()" novalidate>
+    <label>
+      Admin email
+      <input type="email" formControlName="email" placeholder="owner@store.com" />
+      <span class="field-error" *ngIf="showEmailError()">{{ emailError() }}</span>
+    </label>
+    <div class="creds">
+      <p>Sign-in flow</p>
+      <code>We redirect you to Keycloak to enter your password securely.</code>
+    </div>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <button type="submit">Continue to login</button>
+  </form>
+
+  <a routerLink="/register">Need a tenant? Create one here</a>
+</section>

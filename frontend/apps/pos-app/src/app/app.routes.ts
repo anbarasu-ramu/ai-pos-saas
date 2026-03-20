@@ -12,6 +12,11 @@ export const appRoutes: Route[] = [
       import('./features/auth/login-page.component').then((m) => m.LoginPageComponent),
   },
   {
+    path: 'auth/callback',
+    loadComponent: () =>
+      import('./features/auth/auth-callback-page.component').then((m) => m.AuthCallbackPageComponent),
+  },
+  {
     path: 'register',
     loadComponent: () =>
       import('./auth/register.component').then((m) => m.RegisterComponent),

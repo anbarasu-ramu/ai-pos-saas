@@ -58,6 +58,7 @@
       "implicitFlowEnabled": false,
       "serviceAccountsEnabled": false,
       "redirectUris": [
+        "http://localhost:4200/auth/callback",
         "http://localhost:4200/*",
         "http://127.0.0.1:4200/*"
       ],
