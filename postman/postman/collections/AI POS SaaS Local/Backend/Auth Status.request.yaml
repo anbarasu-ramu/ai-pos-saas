@@ -1,0 +1,5 @@
+$kind: http-request
+description: Public auth metadata from the Spring Boot backend.
+url: "{{baseUrl}}/api/auth/status"
+method: GET
+order: 2000

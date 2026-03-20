@@ -1,0 +1,85 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  background:
+    radial-gradient(circle at top left, rgba(10, 132, 255, 0.18), transparent 24%),
+    linear-gradient(135deg, #f3f7fb 0%, #eef2f7 100%);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2rem;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  color: #7dd3fc;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.subcopy {
+  margin: 1rem 0 0;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.nav {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.nav a {
+  color: #cbd5e1;
+  text-decoration: none;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: rgba(148, 163, 184, 0.08);
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease,
+    color 160ms ease;
+}
+
+.nav a:hover,
+.nav a.active {
+  background: #f8fafc;
+  color: #0f172a;
+  transform: translateX(2px);
+}
+
+.content {
+  padding: 2rem;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    padding: 1.5rem;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+}

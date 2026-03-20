@@ -1,0 +1,5 @@
+$kind: http-request
+description: Quick browser-style check that the realm is live.
+url: "{{keycloakBaseUrl}}/realms/{{realm}}/account"
+method: GET
+order: 2000

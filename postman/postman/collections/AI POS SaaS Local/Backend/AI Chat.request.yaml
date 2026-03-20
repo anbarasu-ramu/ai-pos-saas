@@ -1,0 +1,17 @@
+$kind: http-request
+description: Protected AI scaffold endpoint.
+url: "{{baseUrl}}/api/ai/chat"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "message": "Show low stock items"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+order: 4000

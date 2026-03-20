@@ -1,0 +1,10 @@
+$kind: http-request
+description: Protected product scaffold endpoint. Paste a valid Keycloak access
+  token into {{bearerToken}} first.
+url: "{{baseUrl}}/api/products"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{bearerToken}}"
+order: 3000

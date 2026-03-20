@@ -1,0 +1,5 @@
+$kind: http-request
+description: Public backend health endpoint.
+url: "{{baseUrl}}/actuator/health"
+method: GET
+order: 1000
