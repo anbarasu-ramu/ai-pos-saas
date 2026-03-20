@@ -1,0 +1,16 @@
+$kind: http-request
+description: Public registration endpoint that creates a tenant plus the first
+  tenant administrator in Keycloak.
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "owner+{{$timestamp}}@example.com",
+      "password": "Password1",
+      "tenantName": "Anbu Store"
+    }
+order: 3000

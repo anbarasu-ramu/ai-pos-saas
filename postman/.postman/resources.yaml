@@ -9,4 +9,4 @@ localResources:
 # Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
 cloudResources:
   collections:
-    ../postman/collections/AI POS SaaS Local: 73fbd976-746c-4e0d-94f4-ed9fac8f0e62
+    ../postman/collections/AI POS SaaS Local: b5a991ae-6040-4408-8312-52aa61089680

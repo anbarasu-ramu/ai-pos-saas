@@ -15,6 +15,7 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 - Basic Spring Security resource server configuration
 - Starter frontend routes and screens for login, dashboard, products, cart, checkout, and AI assistant
 - Local Keycloak realm import with starter clients, roles, test users, and tenant claim mapping
+- Tenant bootstrap registration flow that creates a tenant plus first tenant administrator through the app and Keycloak Admin API
 
 ### Still In Progress
 
@@ -63,20 +64,26 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 - Keycloak is the source of truth for authentication
 - Spring Boot is configured as an OAuth2 resource server
 - Tenant identity is expected to arrive through JWT claims such as `tenant_id`
-- Local development imports a predefined `ai-pos` realm with `ADMIN` and `CASHIER` roles
-- A public `pos-frontend` client is used for browser login during local development
+- Local development imports a predefined `ai-pos` realm with `TENANT_ADMIN` and `CASHIER` roles
+- A public `pos-client` client is used for browser login during local development
+- The backend provisions the first tenant administrator through a confidential `pos-admin-service` client using Keycloak Admin REST APIs
+- Registration is app-managed: the backend creates the tenant record first, then provisions the Keycloak user, password, tenant attribute, and realm role
+- Duplicate store names are rejected instead of being auto-suffixed
+- Registration compensation now removes a partially created Keycloak user if a later provisioning step fails, to avoid split-brain state between Postgres and Keycloak
 
 ### Multi-Tenancy
 
 - Business entities should carry `tenant_id`
 - Service and repository layers should become tenant-aware by default
 - Cross-tenant reads and writes must fail closed
+- The tenant table now stores a UUID business identifier that is used as the Keycloak `tenant_id` user attribute and intended JWT claim
 
 ### Data Layer
 
 - PostgreSQL is the primary transactional store
 - Flyway manages schema evolution
 - pgvector is reserved for embeddings and semantic retrieval
+- Tenant records use the existing numeric primary key plus a unique UUID business identifier for external identity mapping
 
 ### AI Layer
 
@@ -95,8 +102,8 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 | Area | Status | Notes |
 |---|---|---|
 | Infrastructure | In progress | Compose is scaffolded and validated; full end-to-end container bring-up still needs final verification |
-| Authentication | In progress | Realm import, users, roles, client setup, and backend JWT role mapping now exist; frontend callback handling is still pending |
-| Multi-tenancy | In progress | Base tenant-aware entity pattern exists; enforcement is still partial |
+| Authentication | In progress | Tenant bootstrap registration, Keycloak admin provisioning, and env-driven login URLs now exist; callback/token handling is still pending |
+| Multi-tenancy | In progress | Base tenant-aware entity pattern plus tenant UUID business id now exist; enforcement across all reads and writes is still partial |
 | Inventory | In progress | Product and stock schemas/entities exist; CRUD logic is not complete |
 | Orders | In progress | Order scaffolding exists; checkout workflow is not implemented |
 | AI chat | In progress | Placeholder endpoint exists; Ollama integration is pending |
@@ -110,9 +117,9 @@ This document tracks the evolving technical design for AI POS SaaS and records w
 
 ## Next Build Steps
 
-1. Complete frontend callback handling and token storage/refresh flow.
-2. Implement product, stock, and order CRUD with tenant-aware validation.
-3. Add Ollama client integration and structured AI action parsing.
-4. Introduce service-layer guardrails and audit logging.
-5. Connect frontend feature pages to real backend APIs.
-6. Add integration tests for auth, stock validation, and checkout flows.
+1. Complete frontend callback handling and token storage/refresh flow after successful Keycloak login.
+2. Add integration tests for registration success, duplicate store rejection, duplicate user rejection, and compensation behavior.
+3. Implement product, stock, and order CRUD with tenant-aware validation.
+4. Add Ollama client integration and structured AI action parsing.
+5. Introduce service-layer guardrails and audit logging.
+6. Connect the remaining frontend feature pages to real backend APIs.

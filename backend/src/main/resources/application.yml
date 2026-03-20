@@ -21,6 +21,16 @@ spring:
         jwt:
           issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://localhost:8081/realms/ai-pos}
 
+app:
+  keycloak:
+    public-base-url: ${APP_KEYCLOAK_PUBLIC_BASE_URL:http://localhost:8081}
+    admin-base-url: ${APP_KEYCLOAK_ADMIN_BASE_URL:http://localhost:8081}
+    realm: ${APP_KEYCLOAK_REALM:ai-pos}
+    client-id: ${APP_KEYCLOAK_CLIENT_ID:pos-client}
+    redirect-uri: ${APP_KEYCLOAK_REDIRECT_URI:http://localhost:4200}
+    admin-client-id: ${APP_KEYCLOAK_ADMIN_CLIENT_ID:pos-admin-service}
+    admin-client-secret: ${APP_KEYCLOAK_ADMIN_CLIENT_SECRET:pos-admin-service-secret}
+
 management:
   endpoints:
     web:

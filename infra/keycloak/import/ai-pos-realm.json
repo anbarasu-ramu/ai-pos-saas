@@ -10,7 +10,7 @@
   "roles": {
     "realm": [
       {
-        "name": "ADMIN",
+        "name": "TENANT_ADMIN",
         "description": "Tenant administrator"
       },
       {
@@ -48,7 +48,7 @@
   ],
   "clients": [
     {
-      "clientId": "pos-frontend",
+      "clientId": "pos-client",
       "name": "POS Frontend",
       "enabled": true,
       "protocol": "openid-connect",
@@ -77,6 +77,23 @@
         "offline_access",
         "microprofile-jwt"
       ]
+    },
+    {
+      "clientId": "pos-admin-service",
+      "name": "POS Admin Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "pos-admin-service-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "defaultClientScopes": [
+        "profile",
+        "email",
+        "roles"
+      ]
     }
   ],
   "users": [
@@ -89,7 +106,7 @@
       "email": "admin@ai-pos.local",
       "attributes": {
         "tenant_id": [
-          "store-001"
+          "00000000-0000-0000-0000-000000000001"
         ]
       },
       "credentials": [
@@ -100,7 +117,7 @@
         }
       ],
       "realmRoles": [
-        "ADMIN"
+        "TENANT_ADMIN"
       ]
     },
     {
@@ -112,7 +129,7 @@
       "email": "cashier@ai-pos.local",
       "attributes": {
         "tenant_id": [
-          "store-001"
+          "00000000-0000-0000-0000-000000000001"
         ]
       },
       "credentials": [
@@ -125,6 +142,18 @@
       "realmRoles": [
         "CASHIER"
       ]
+    },
+    {
+      "username": "service-account-pos-admin-service",
+      "enabled": true,
+      "serviceAccountClientId": "pos-admin-service",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users",
+          "query-users"
+        ]
+      }
     }
   ]
 }
