@@ -10,3 +10,4 @@ localResources:
 cloudResources:
   collections:
     ../postman/collections/AI POS SaaS Local: b5a991ae-6040-4408-8312-52aa61089680
+    ../postman/collections/AI POS Auth Test Collection: 88f874ae-2e49-4071-9783-f377ebfba862

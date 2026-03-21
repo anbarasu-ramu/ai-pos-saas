@@ -1,0 +1,96 @@
+{
+  "info": {
+    "name": "AI POS Auth Test Collection",
+    "_postman_id": "aipos-auth-collection",
+    "description": "Test tenant_id and role-based access",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth - Status",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/auth/status"
+      }
+    },
+    {
+      "name": "Auth - Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"test@ai-pos.local\",\n  \"password\": \"Test1234\",\n  \"tenantName\": \"Test Store\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Debug - Me",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/debug/me"
+      }
+    },
+    {
+      "name": "Tenant - Current",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/tenant/current"
+      }
+    },
+    {
+      "name": "Admin - Only",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/admin/only"
+      }
+    },
+    {
+      "name": "Cashier - Only",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/cashier/only"
+      }
+    }
+  ]
+}
