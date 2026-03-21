@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "test@ai-pos.local",
+      "password": "Test1234",
+      "tenantName": "Test Store"
+    }
+order: 2000
