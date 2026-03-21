@@ -31,6 +31,8 @@
 
 ---
 
+
+
 ## 🏢 3. Multi-Tenant Architecture
 
 | ID | Requirement |
@@ -41,6 +43,8 @@
 | TEN-4 | Prevent cross-tenant access |
 
 ---
+
+
 
 ## 🏪 4. Product & Inventory Management
 
@@ -209,6 +213,19 @@
 | PROD-2 | Secure secrets handling |
 | PROD-3 | Health check endpoints |
 | PROD-4 | Graceful shutdown |
+
+---
+
+## 👥 18. User Management
+
+| ID | Requirement |
+|----|------------|
+| USR-1 | Admin can create cashier users |
+| USR-2 | Assign roles (ADMIN, CASHIER) |
+| USR-3 | Users inherit tenant_id from admin |
+| USR-4 | Prevent cross-tenant user creation |
+| USR-5 | List users per tenant |
+| USR-6 | Disable/delete users |
 
 ---
 
