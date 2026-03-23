@@ -1,52 +1,96 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { PosApiService } from '../../core/api/pos-api.service';
-
+import { ProductService } from './product.service';
+import { NotificationService } from '../../core/notification.service';
 @Component({
   selector: 'app-product-list-page',
   standalone: true,
   imports: [CommonModule, CurrencyPipe],
-  template: `
-    <section class="page">
-      <div class="heading">
-        <div>
-          <p class="eyebrow">Inventory</p>
-          <h2>Product and stock scaffold</h2>
-        </div>
-        <button type="button">Add Product</button>
-      </div>
-
-      <div class="table">
-        <div class="row header">
-          <span>Name</span>
-          <span>Category</span>
-          <span>Stock</span>
-          <span>Price</span>
-        </div>
-
-        <div class="row" *ngFor="let product of products">
-          <span>{{ product.name }}</span>
-          <span>{{ product.category }}</span>
-          <span [class.low]="product.stockQuantity < 10">{{ product.stockQuantity }}</span>
-          <span>{{ product.price | currency }}</span>
-        </div>
-      </div>
-    </section>
-  `,
-  styles: [`
-    .page { display: grid; gap: 1rem; }
-    .heading { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
-    .eyebrow { margin: 0; text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.75rem; color: #0284c7; }
-    h2 { margin: 0.4rem 0 0; }
-    button { border: 0; border-radius: 999px; background: #0f172a; color: white; padding: 0.9rem 1.2rem; cursor: pointer; }
-    .table { background: white; border-radius: 22px; overflow: hidden; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); }
-    .row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid #e2e8f0; }
-    .row.header { background: #f8fafc; font-weight: 700; color: #334155; }
-    .row:last-child { border-bottom: 0; }
-    .low { color: #b91c1c; font-weight: 700; }
-  `],
+  templateUrl: './product-list-page.component.html',
+  styleUrl: './product-list-page.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProductListPageComponent {
+export class ProductListPageComponent implements OnInit {
   private readonly api = inject(PosApiService);
-  protected readonly products = this.api.getProducts();
+  private readonly productService = inject(ProductService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private notification = inject(NotificationService);
+  
+  @Output() updateProduct = new EventEmitter<any>();
+  @Output() toggleActive = new EventEmitter<any>();
+  @Input() showAddToCart = true;
+  @Output() addToCart = new EventEmitter<any>();
+
+  @Input() products: any[] = [];
+
+  @Output() refresh = new EventEmitter<void>();
+
+  ngOnInit() {
+    if (this.shouldLoadFromBackend()) {
+      this.loadProductsFromBackend();
+    }
+  }
+
+  ngOnChanges() {
+    if (this.shouldLoadFromBackend()) {
+      this.loadProductsFromBackend();
+    }
+    console.log('Child received:', this.products);
+  }
+
+  private shouldLoadFromBackend(): boolean {
+    return this.showAddToCart || this.products.length === 0;
+  }
+
+  private loadProductsFromBackend() {
+    this.productService.getProducts().subscribe({
+      next: (res) => {
+        this.products = [...res];
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Failed to load products', err);
+      }
+    });
+  }
+
+  onRefresh() {
+    this.refresh.emit();
+  }
+
+  onEdit(product: any) {
+    console.log('Edit product:', product);
+    this.updateProduct.emit(product);  
+  }
+
+onToggleActive(product: any) {
+    console.log('Toggle active for product:', product);
+    this.toggleActive.emit(product);
+  }
+
+  isProductActive(product: any): boolean {
+    if (this.showAddToCart) {
+      // Cashier flow may show all available products, allow adding to cart regardless
+      // of admin-side active flag to avoid cart being blocked for default product data.
+      return true;
+    }
+
+    return product?.active !== false;
+  }
+
+  onAddToCart(product: any) {
+    // alert('Add to cart clicked for product: ' + product.name);
+    console.log('Add to cart clicked for product:', product);
+    // Ensure we still allow cashier usage when showAddToCart is true.
+    if (!this.isProductActive(product)) {
+      return;
+    }
+
+    this.api.addToCart(product);
+    this.addToCart.emit(product);
+    this.notification.success(`${product.name} added to cart`);
+    console.log('Added to cart:', product);
+  }
 }
+

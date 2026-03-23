@@ -22,6 +22,12 @@ export const appRoutes: Route[] = [
       import('./auth/register.component').then((m) => m.RegisterComponent),
   },
   {
+    path: 'users',
+    loadComponent: () =>
+      import('./features/users/users-component').then((m) => m.UsersComponent),
+  },
+
+  {
     path: 'dashboard',
     loadComponent: () =>
       import('./features/dashboard/dashboard-page.component').then((m) => m.DashboardPageComponent),
@@ -30,6 +36,11 @@ export const appRoutes: Route[] = [
     path: 'products',
     loadComponent: () =>
       import('./features/products/product-list-page.component').then((m) => m.ProductListPageComponent),
+  },
+  {
+    path: 'inventory',
+    loadComponent: () =>
+      import('./features/inventory/inventory-component').then((m) => m.InventoryComponent),
   },
   {
     path: 'cart',

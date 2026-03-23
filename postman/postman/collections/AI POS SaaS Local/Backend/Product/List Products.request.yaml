@@ -1,0 +1,11 @@
+$kind: http-request
+name: List Products
+url: "{{baseUrl}}/api/products"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{access_token}}
+body:
+  type: text
+  content: ""
+order: 2876613345191142

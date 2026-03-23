@@ -6,7 +6,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const authService = inject(AuthService);
   const accessToken = authService.getAccessToken();
 
-  if (!accessToken || !request.url.startsWith('http://localhost:8080')) {
+  if (!accessToken) {
     return next(request);
   }
 

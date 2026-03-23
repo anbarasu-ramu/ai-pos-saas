@@ -1,0 +1,16 @@
+$kind: http-request
+name: Create Product
+url: "{{baseUrl}}/api/products"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{access_token}}
+body:
+  type: text
+  content: |-
+    {
+      "name": "Coffee",
+      "price": 50.00,
+      "stockQuantity": 100
+    }
+order: 1774120273548

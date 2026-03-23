@@ -5,12 +5,13 @@ import com.anbu.aipos.core.port.in.RegisterUserUseCase;
 import com.anbu.aipos.core.port.out.KeycloakAdminPort;
 import com.anbu.aipos.tenant.domain.Tenant;
 import com.anbu.aipos.tenant.repository.TenantRepository;
-import java.text.Normalizer;
-import java.util.Locale;
-import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.text.Normalizer;
+import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class RegisterUserService implements RegisterUserUseCase {
@@ -48,7 +49,7 @@ public class RegisterUserService implements RegisterUserUseCase {
         Tenant savedTenant = tenantRepository.saveAndFlush(tenant);
 
         try {
-            keycloakAdminPort.createTenantAdmin(new KeycloakAdminPort.TenantAdminRegistration(
+            keycloakAdminPort.createUser(new KeycloakAdminPort.UserProvisioningRequest(
                     command.email().trim().toLowerCase(Locale.ROOT),
                     command.password(),
                     tenantId.toString(),

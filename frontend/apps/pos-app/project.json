@@ -13,7 +13,7 @@
         "outputPath": "dist/apps/pos-app",
         "index": "apps/pos-app/src/index.html",
         "main": "apps/pos-app/src/main.ts",
-        "tsConfig": "apps/pos-app/tsconfig.app.json",
+        "tsConfig": "apps/pos-app/tsconfig.app.json",        
         "assets": [
           {
             "glob": "**/*",
@@ -49,6 +49,9 @@
     "serve": {
       "continuous": true,
       "executor": "@angular-devkit/build-angular:dev-server",
+      "options": {
+        "proxyConfig": "apps/pos-app/proxy.conf.json"
+      },
       "configurations": {
         "production": {
           "buildTarget": "pos-app:build:production"

@@ -1,0 +1,35 @@
+<section class="page">
+  <p class="eyebrow">Cart</p>
+  <h2>Current basket</h2>
+
+  <ng-container *ngIf="lines.length; else emptyCart">
+    <article class="card" *ngFor="let line of lines">
+      <div>
+        <strong>{{ line.name }}</strong>
+        <p>{{ line.sku }}</p>
+      </div>
+
+      <div class="quantity">x{{ line.quantity }}</div>
+      <div class="total">{{ line.total | currency }}</div>
+
+      <div class="actions">
+        <button class="small-btn" (click)="decrement(line)">-</button>
+        <button class="small-btn" (click)="increment(line)">+</button>
+        <button class="small-btn remove" (click)="removeItem(line.sku)">Remove</button>
+      </div>
+    </article>
+
+    <footer class="summary">
+      <span>Total</span>
+      <strong>{{ total() | currency }}</strong>
+    </footer>
+
+    <div class="controls">
+      <button class="btn clear" (click)="clearCart()" [disabled]="lines.length===0">Clear Cart</button>
+    </div>
+  </ng-container>
+
+  <ng-template #emptyCart>
+    <p class="empty">Your cart is empty.</p>
+  </ng-template>
+</section>

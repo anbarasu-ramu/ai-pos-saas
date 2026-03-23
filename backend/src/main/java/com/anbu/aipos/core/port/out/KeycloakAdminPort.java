@@ -2,9 +2,9 @@ package com.anbu.aipos.core.port.out;
 
 public interface KeycloakAdminPort {
 
-    void createTenantAdmin(TenantAdminRegistration registration);
+    void createUser(UserProvisioningRequest registration);
 
-    record TenantAdminRegistration(
+    record UserProvisioningRequest(
             String email,
             String password,
             String tenantId,

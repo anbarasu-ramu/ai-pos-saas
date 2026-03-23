@@ -5,7 +5,7 @@ import { Observable, firstValueFrom } from 'rxjs';
 export interface RegistrationRequest {
   email: string;
   password: string;
-  tenantName: string;
+  tenantName ?: string;
 }
 
 export interface RegistrationResponse {
@@ -54,6 +54,7 @@ interface CurrentSessionResponse {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly authApiBaseUrl = `${this.resolveBaseUrl(8080)}/api/auth`;
+  private readonly userApiBaseUrl = `${this.resolveBaseUrl(8080)}/api/users`;
   private readonly keycloakBaseUrl = this.resolveBaseUrl(8081);
   private readonly realm = 'ai-pos';
   private readonly clientId = 'pos-client';
@@ -67,6 +68,10 @@ export class AuthService {
 
   register(payload: RegistrationRequest): Observable<RegistrationResponse> {
     return this.http.post<RegistrationResponse>(`${this.authApiBaseUrl}/register`, payload);
+  }
+
+    createUser(payload: RegistrationRequest): Observable<RegistrationResponse> {
+    return this.http.post<RegistrationResponse>(`${this.userApiBaseUrl}`, payload);
   }
 
   async login(loginHint?: string): Promise<void> {

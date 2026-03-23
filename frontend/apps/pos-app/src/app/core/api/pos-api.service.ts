@@ -8,6 +8,8 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class PosApiService {
+  private cartLines: CartLine[] = [];
+
   getDashboardMetrics(): MetricCard[] {
     return [
       { label: 'Sales Today', value: '$4,820', trend: '+12% vs yesterday' },
@@ -16,19 +18,41 @@ export class PosApiService {
     ];
   }
 
-  getProducts(): ProductSummary[] {
-    return [
-      { id: 'SKU-101', name: 'Arabica Beans 1kg', price: 24.99, stockQuantity: 14, category: 'Inventory' },
-      { id: 'SKU-102', name: 'Paper Cups', price: 5.5, stockQuantity: 200, category: 'Supplies' },
-      { id: 'SKU-103', name: 'Blueberry Muffin', price: 3.99, stockQuantity: 9, category: 'Bakery' },
-    ];
-  }
+  // getProducts(): ProductSummary[] {
+  //   return [
+  //     { id: 'SKU-101', name: 'Arabica Beans 1kg', price: 24.99, stockQuantity: 14, category: 'Inventory', active: true },
+  //     { id: 'SKU-102', name: 'Paper Cups', price: 5.5, stockQuantity: 200, category: 'Supplies', active: true },
+  //     { id: 'SKU-103', name: 'Blueberry Muffin', price: 3.99, stockQuantity: 9, category: 'Bakery', active: true },
+  //   ];
+  // }
 
   getCartLines(): CartLine[] {
-    return [
-      { sku: 'SKU-103', name: 'Blueberry Muffin', quantity: 2, total: 7.98 },
-      { sku: 'SKU-101', name: 'Arabica Beans 1kg', quantity: 1, total: 24.99 },
-    ];
+    return this.cartLines;
+  }
+
+  addToCart(product: ProductSummary, quantity = 1): void {
+    const existing = this.cartLines.find((line) => line.sku === product.id);
+    const unitPrice = product.price;
+
+    if (existing) {
+      existing.quantity += quantity;
+      existing.total = Number((existing.quantity * unitPrice).toFixed(2));
+    } else {
+      this.cartLines.push({
+        sku: product.id,
+        name: product.name,
+        quantity,
+        total: Number((quantity * unitPrice).toFixed(2)),
+      });
+    }
+  }
+
+  removeFromCart(sku: string): void {
+    this.cartLines = this.cartLines.filter((line) => line.sku !== sku);
+  }
+
+  clearCart(): void {
+    this.cartLines = [];
   }
 
   getAiSuggestions(): AiSuggestion[] {

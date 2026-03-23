@@ -1,0 +1,16 @@
+$kind: http-request
+name: User - Provisioning
+url: "{{baseUrl}}/api/users"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{access_token}}
+body:
+  type: text
+  content: |-
+    {
+      "email": "anbu1@ai-pos.local",
+      "password": "Test1234",
+      "tenantName": "Test Store"
+    }
+order: 2156
