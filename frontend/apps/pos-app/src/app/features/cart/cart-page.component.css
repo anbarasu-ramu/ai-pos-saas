@@ -1,0 +1,14 @@
+.page { display: grid; gap: 1rem; max-width: 760px; }
+.eyebrow { margin: 0; text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.75rem; color: #0284c7; }
+h2 { margin: 0; }
+.card, .summary { display: grid; align-items: center; background: white; padding: 1rem 1.25rem; border-radius: 22px; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); }
+.card { grid-template-columns: 1fr auto auto auto; gap: 0.75rem; }
+.quantity, .total { font-weight: 700; }
+.actions { display: flex; gap: 0.5rem; }
+.small-btn { border: 0; border-radius: 999px; background: #0f172a; color: white; padding: 0.2rem 0.5rem; cursor: pointer; }
+.small-btn.remove { background: #dc2626; }
+.summary { grid-template-columns: 1fr auto; font-size: 1.2rem; }
+.controls { display: flex; justify-content: flex-end; gap: 0.75rem; }
+.btn { border: 0; border-radius: 999px; background: #0f172a; color: white; padding: 0.7rem 1.3rem; cursor: pointer; }
+.btn.clear { background: #ef4444; }
+.btn[disabled], .small-btn[disabled] { opacity: 0.45; cursor: not-allowed; }

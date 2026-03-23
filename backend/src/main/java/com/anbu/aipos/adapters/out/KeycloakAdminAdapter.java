@@ -2,9 +2,6 @@ package com.anbu.aipos.adapters.out;
 
 import com.anbu.aipos.application.RegistrationException;
 import com.anbu.aipos.core.port.out.KeycloakAdminPort;
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,6 +11,10 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class KeycloakAdminAdapter implements KeycloakAdminPort {
@@ -27,7 +28,7 @@ public class KeycloakAdminAdapter implements KeycloakAdminPort {
     }
 
     @Override
-    public void createTenantAdmin(TenantAdminRegistration registration) {
+    public void createUser(UserProvisioningRequest registration) {
         String accessToken = null;
         String userId = null;
 
@@ -74,7 +75,7 @@ public class KeycloakAdminAdapter implements KeycloakAdminPort {
         return response.accessToken();
     }
 
-    private String createUser(String accessToken, TenantAdminRegistration registration) {
+    private String createUser(String accessToken, UserProvisioningRequest registration) {
         Map<String, Object> userPayload = Map.of(
                 "username", registration.email(),
                 "email", registration.email(),

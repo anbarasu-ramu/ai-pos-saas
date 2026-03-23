@@ -1,0 +1,30 @@
+<section class="page card">
+    <section class="header">
+      <h2 class="eyebrow"> Create User </h2>
+    </section>  
+ 
+  
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label>
+      Email
+      <input type="email" formControlName="email" placeholder="username@store.com" />
+      <span class="field-error" *ngIf="showError('email')">{{ fieldError('email') }}</span>
+    </label>
+    <label>
+      Password
+      <input type="password" formControlName="password" placeholder="Strong password" />
+      <span class="hint">Use at least 8 characters with upper, lower, and a number.</span>
+      <span class="field-error" *ngIf="showError('password')">{{ fieldError('password') }}</span>
+    </label>
+   
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+
+    <button type="button" (click)="submit()" [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Provisioning...' : 'Create User' }}
+    </button>
+  </form>
+
+  <a routerLink="/login">Already registered? Continue to login</a>
+</section>

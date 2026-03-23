@@ -1,4 +1,4 @@
-package com.anbu.aipos.adapters.in.web;
+package com.anbu.aipos.adapters.in.web.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,0 +1,76 @@
+<div class="p-6 space-y-6">
+
+  <!-- 🔹 Header -->
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-extrabold">Inventory</h1>
+
+    <button
+      class="bg-pink-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      (click)="toggleForm()"
+    >
+      + Add Product
+    </button>
+  </div>
+
+  <!-- 🔹 Create Form -->
+  <div *ngIf="showForm" class="bg-white p-4 rounded shadow-md">
+    <form [formGroup]="form" (ngSubmit)="saveProduct()" class="space-y-4">
+
+      <div>
+        <label class="block text-sm font-medium">Name</label>
+        <input
+          type="text"
+          formControlName="name"
+          class="w-full border rounded px-3 py-2 mt-1"
+        />
+      </div>
+
+       <div>
+        <label class="block text-sm font-medium">Category</label>
+        <input
+          type="text"
+          formControlName="category"
+          class="w-full border rounded px-3 py-2 mt-1"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium">Price</label>
+        <input
+          type="number"
+          formControlName="price"
+          class="w-full border rounded px-3 py-2 mt-1"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium">Stock</label>
+        <input
+          type="number"
+          formControlName="stockQuantity"
+          class="w-full border rounded px-3 py-2 mt-1"
+        />
+      </div>
+
+      <div class="flex gap-2">
+        <button
+          type="submit"
+          class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          {{ editingProductId ? 'Update Product' : 'Save Product' }}
+        </button>
+
+        <button
+          type="button"
+          class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+          (click)="cancelEdit()"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="py-2">
+  <app-product-list-page [products]="products" [showAddToCart]="false" (refresh)="loadProducts()" (updateProduct)="onEdit($event)" (toggleActive)="onToggleActive($event)"></app-product-list-page>
+  </div>
