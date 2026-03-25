@@ -1,43 +1,45 @@
 <section class="page">
 
+  <p  class="eyebrow">Products</p>
+
   <div class="table">
 
     <!-- 🔹 Header -->
-    <div class="row header">
+    <div class="row header" [ngClass]="isInventoryView ? 'inventory' : 'cashier'">
       <div class="cell">Name</div>
       <div class="cell">Category</div>
-      <div class="cell">Stock</div>
+      <div class="cell" *ngIf="isInventoryView">Stock</div>
       <div class="cell">Price</div>
 
-      <div class="cell" *ngIf="showAddToCart">Add</div>
+      <div class="cell" *ngIf="!isInventoryView">Add</div>
 
-      <ng-container *ngIf="!showAddToCart">
+      <ng-container *ngIf="isInventoryView">
         <div class="cell">Edit</div>
         <div class="cell">Deactivate</div>
       </ng-container>
     </div>
 
     <!-- 🔹 Rows -->
-    <div class="row" *ngFor="let product of products">
+    <div class="row" [ngClass]="isInventoryView ? 'inventory' : 'cashier'" *ngFor="let product of products">
 
       <div class="cell">{{ product.name }}</div>
       <div class="cell">{{ product.category }}</div>
-      <div class="cell">{{ product.stockQuantity }}</div>
+      <div class="cell" *ngIf="isInventoryView">{{ product.stockQuantity }}</div>
       <div class="cell">{{ product.price | currency }}</div>
 
       <!-- Cashier -->
-      <div class="cell" *ngIf="showAddToCart">
-        <button class="small-btn" (click)="onAddToCart(product)">
+      <div class="cell" *ngIf="!isInventoryView">
+        <button class="btn" (click)="onAddToCart(product)">
           Add to Cart
         </button>
       </div>
 
       <!-- Admin -->
-      <ng-container *ngIf="!showAddToCart">
+      <ng-container *ngIf="isInventoryView">
 
         <div class="cell">
           <button
-            class="small-btn"
+            class="btn btn-wide"
             [disabled]="!product.active"
             [class.disabled-btn]="!product.active"
             (click)="onEdit(product)">
@@ -47,7 +49,7 @@
 
         <div class="cell">
           <button
-            class="small-btn"
+            class="btn btn-wide"
             [class.activate-btn]="!product.active"
             (click)="onToggleActive(product)">
             {{ product.active ? 'Deactivate' : 'Activate' }}

@@ -1,11 +1,13 @@
 package com.anbu.aipos.common.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
 
-//@Getter
-//@Setter
+@Getter
+@Setter
 @MappedSuperclass
 public abstract class AuditableEntity {
 
@@ -34,27 +36,27 @@ public abstract class AuditableEntity {
 
 
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+//    public Long getId() {
+//        return id;
+//    }
+//
+//    public void setId(Long id) {
+//        this.id = id;
+//    }
+//
+//    public Instant getCreatedAt() {
+//        return createdAt;
+//    }
+//
+//    public void setCreatedAt(Instant createdAt) {
+//        this.createdAt = createdAt;
+//    }
+//
+//    public Instant getUpdatedAt() {
+//        return updatedAt;
+//    }
+//
+//    public void setUpdatedAt(Instant updatedAt) {
+//        this.updatedAt = updatedAt;
+//    }
 }

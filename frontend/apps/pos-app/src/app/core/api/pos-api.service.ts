@@ -1,15 +1,19 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   AiSuggestion,
   CartLine,
   MetricCard,
   ProductSummary,
 } from './pos.models';
+import { signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class PosApiService {
-  private cartLines: CartLine[] = [];
+  private readonly cartLines = signal<CartLine[]>([]);
+  private http = inject(HttpClient);
 
+  // 🔹 Dashboard (unchanged)
   getDashboardMetrics(): MetricCard[] {
     return [
       { label: 'Sales Today', value: '$4,820', trend: '+12% vs yesterday' },
@@ -18,43 +22,104 @@ export class PosApiService {
     ];
   }
 
-  // getProducts(): ProductSummary[] {
-  //   return [
-  //     { id: 'SKU-101', name: 'Arabica Beans 1kg', price: 24.99, stockQuantity: 14, category: 'Inventory', active: true },
-  //     { id: 'SKU-102', name: 'Paper Cups', price: 5.5, stockQuantity: 200, category: 'Supplies', active: true },
-  //     { id: 'SKU-103', name: 'Blueberry Muffin', price: 3.99, stockQuantity: 9, category: 'Bakery', active: true },
-  //   ];
-  // }
-
-  getCartLines(): CartLine[] {
-    return this.cartLines;
+  // 🔹 Cart (readonly signal)
+  getCartLines() {
+    return this.cartLines.asReadonly();
   }
 
+  // 🔥 Add to cart (immutable)
   addToCart(product: ProductSummary, quantity = 1): void {
-    const existing = this.cartLines.find((line) => line.sku === product.id);
-    const unitPrice = product.price;
+  this.cartLines.update(lines => {
+    const sku = String(product.id);
+    const unitPrice = Number(product.price ?? 0);
+
+    const existing = lines.find(line => line.sku === sku);
 
     if (existing) {
-      existing.quantity += quantity;
-      existing.total = Number((existing.quantity * unitPrice).toFixed(2));
-    } else {
-      this.cartLines.push({
-        sku: product.id,
+      return lines.map(line =>
+        line.sku === sku
+          ? {
+              ...line,
+              quantity: line.quantity + quantity,
+              total: Number(((line.quantity + quantity) * unitPrice).toFixed(2))
+            }
+          : line
+      );
+    }
+
+    return [
+      ...lines,
+      {
+        sku : String(product.id),
         name: product.name,
         quantity,
-        total: Number((quantity * unitPrice).toFixed(2)),
-      });
-    }
+        total: Number((quantity * unitPrice).toFixed(2))
+      }
+    ];
+  });
+}
+
+  // 🔥 Increment
+  increment(sku: string): void {
+    this.cartLines.update(lines =>
+      lines.map(line => {
+        if (line.sku !== sku) return line;
+
+        const unitPrice = line.total / line.quantity;
+        const newQty = line.quantity + 1;
+
+        return {
+          ...line,
+          quantity: newQty,
+          total: Number((newQty * unitPrice).toFixed(2))
+        };
+      })
+    );
   }
 
+  // 🔥 Decrement
+  decrement(sku: string): void {
+    this.cartLines.update(lines =>
+      lines
+        .map(line => {
+          if (line.sku !== sku) return line;
+
+          if (line.quantity <= 1) return null;
+
+          const unitPrice = line.total / line.quantity;
+          const newQty = line.quantity - 1;
+
+          return {
+            ...line,
+            quantity: newQty,
+            total: Number((newQty * unitPrice).toFixed(2))
+          };
+        })
+        .filter(Boolean) as CartLine[]
+    );
+  }
+
+  // 🔥 Remove item
   removeFromCart(sku: string): void {
-    this.cartLines = this.cartLines.filter((line) => line.sku !== sku);
+    this.cartLines.update(lines =>
+      lines.filter(line => line.sku !== sku)
+    );
   }
 
+  // 🔥 Clear cart
   clearCart(): void {
-    this.cartLines = [];
+    this.cartLines.set([]);
   }
 
+    confirmOrder() {
+    throw new Error('Method not implemented.');
+  }
+
+  checkout(request: any) {
+  return this.http.post('/api/checkout', request);
+}
+
+  // 🔹 AI suggestions (unchanged)
   getAiSuggestions(): AiSuggestion[] {
     return [
       { title: 'Restock signal', detail: 'Blueberry Muffin is below the preferred threshold for the lunch rush.' },

@@ -1,7 +1,7 @@
 package com.anbu.aipos.adapters.in.web;
 
-import com.anbu.aipos.adapters.in.web.dto.CreateUserRequest;
-import com.anbu.aipos.application.UserService;
+import com.anbu.aipos.adapters.in.web.dto.user.CreateUserRequest;
+import com.anbu.aipos.application.user.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

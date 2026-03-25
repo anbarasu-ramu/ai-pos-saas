@@ -1,0 +1,8 @@
+$kind: http-request
+name: auth - Me
+url: "{{baseUrl}}/api/auth/me"
+method: GET
+headers:
+  - key: Authorization
+    value: Bearer {{access_token}}
+order: 3235

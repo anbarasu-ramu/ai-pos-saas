@@ -16,10 +16,11 @@ export class ProductListPageComponent implements OnInit {
   private readonly productService = inject(ProductService);
   private readonly cdr = inject(ChangeDetectorRef);
   private notification = inject(NotificationService);
-  
+
   @Output() updateProduct = new EventEmitter<any>();
   @Output() toggleActive = new EventEmitter<any>();
   @Input() showAddToCart = true;
+  @Input() isInventoryView = false;
   @Output() addToCart = new EventEmitter<any>();
 
   @Input() products: any[] = [];
@@ -40,13 +41,13 @@ export class ProductListPageComponent implements OnInit {
   }
 
   private shouldLoadFromBackend(): boolean {
-    return this.showAddToCart || this.products.length === 0;
+    return !this.isInventoryView ;
   }
 
   private loadProductsFromBackend() {
     this.productService.getProducts().subscribe({
       next: (res) => {
-        this.products = [...res];
+        this.products = this.isInventoryView ? [...res] : res.filter(p => p.active ); ;
         this.cdr.markForCheck();
       },
       error: (err) => {
@@ -61,10 +62,10 @@ export class ProductListPageComponent implements OnInit {
 
   onEdit(product: any) {
     console.log('Edit product:', product);
-    this.updateProduct.emit(product);  
+    this.updateProduct.emit(product);
   }
 
-onToggleActive(product: any) {
+  onToggleActive(product: any) {
     console.log('Toggle active for product:', product);
     this.toggleActive.emit(product);
   }

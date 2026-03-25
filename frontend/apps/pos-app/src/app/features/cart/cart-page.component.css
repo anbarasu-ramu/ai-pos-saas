@@ -12,3 +12,27 @@ h2 { margin: 0; }
 .btn { border: 0; border-radius: 999px; background: #0f172a; color: white; padding: 0.7rem 1.3rem; cursor: pointer; }
 .btn.clear { background: #ef4444; }
 .btn[disabled], .small-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+
+.empty-cart-container {
+  text-align: center;
+  margin-top: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.empty-cart-container h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #d51971;
+}
+
+.empty-cart-container p {
+  font-size: 16px;
+  color: #100f0f;
+  margin-top: 10px;
+  text-align: center;
+  margin-bottom: 10px;  
+}
