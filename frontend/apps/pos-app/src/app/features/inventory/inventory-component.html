@@ -72,5 +72,5 @@
   </div>
 
   <div class="py-2">
-  <app-product-list-page [products]="products" [showAddToCart]="false" (refresh)="loadProducts()" (updateProduct)="onEdit($event)" (toggleActive)="onToggleActive($event)"></app-product-list-page>
+  <app-product-list-page [products]="products" [isInventoryView]="true" (refresh)="loadProducts()" (updateProduct)="onEdit($event)" (toggleActive)="onToggleActive($event)"></app-product-list-page>
   </div>

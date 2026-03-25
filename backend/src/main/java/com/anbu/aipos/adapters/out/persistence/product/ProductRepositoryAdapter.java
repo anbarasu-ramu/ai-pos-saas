@@ -25,6 +25,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
+    public void saveAll(List<Product> productsToSave) {
+        jpaRepository.saveAll(productsToSave.stream().map(mapper::toEntity).toList());
+    }
+
+    @Override
     public List<Product> findByTenantId(String tenantId) {
         return jpaRepository.findByTenantId(tenantId)
                 .stream()
@@ -44,4 +49,6 @@ public class ProductRepositoryAdapter implements ProductRepository {
             jpaRepository.deleteById(product.getId().value());
         }
     }
+
+
 }

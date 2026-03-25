@@ -14,8 +14,8 @@
 .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 1.75rem;
+  letter-spacing: 0.10em;
+  font-size: 1rem;
   color: #0284c7;
 }
 
@@ -24,14 +24,14 @@ h2 {
 }
 
 /* Buttons */
-button {
+/* button {
   border: 0;
   border-radius: 999px;
   background: #0f172a;
   color: white;
   padding: 0.9rem 1.2rem;
   cursor: pointer;
-}
+} */
 
 /* Table */
 .table {
@@ -46,12 +46,22 @@ button {
 /* Row */
 .row {
   display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1fr; /* consistent layout */
+  /* grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1fr; consistent layout */
+  /* display: flex; */
   gap: 0.75rem;
   align-items: center;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #f1f5f9;
   justify-content: center;
+}
+
+.row.inventory {
+  grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1fr;
+}
+
+/* Cashier view (4 columns) */
+.row.cashier {
+  grid-template-columns: 2fr 1.5fr 1fr 1fr;
 }
 
 .row:last-child {
@@ -107,6 +117,37 @@ button {
 
 /* Activate button */
 .small-btn.activate-btn {
+  background: #16a34a;
+  color: white;
+}
+
+
+.btn {
+  border: 0;
+  border-radius: 999px;
+  background: #da1010;
+  color: white;
+  padding: 0.4rem 0.4rem;
+  cursor: pointer;
+  text-wrap: nowrap;
+}
+
+.btn-wide {
+  min-width: 100px;
+  text-align: center;
+}
+
+.btn.clear {
+  background: #ef4444;
+}
+
+.btn[disabled],
+.small-btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn.activate-btn {
   background: #16a34a;
   color: white;
 }

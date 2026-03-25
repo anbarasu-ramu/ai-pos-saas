@@ -1,42 +1,84 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { PosApiService } from '../../core/api/pos-api.service';
+import { CommonModule, CurrencyPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { NotificationService } from '../../core/notification.service';
 
 @Component({
   selector: 'app-checkout-page',
-  standalone: true,
-  template: `
-    <section class="page">
-      <p class="eyebrow">Checkout</p>
-      <h2>Payment and order finalization scaffold</h2>
-
-      <div class="grid">
-        <article class="panel">
-          <h3>Flow milestones</h3>
-          <ul>
-            <li>Validate stock before confirmation</li>
-            <li>Persist order and line items</li>
-            <li>Emit payment status and receipt payload</li>
-          </ul>
-        </article>
-
-        <article class="panel">
-          <h3>Guardrails</h3>
-          <ul>
-            <li>Reject negative or zero quantities</li>
-            <li>Block cross-tenant order access</li>
-            <li>Capture structured audit events</li>
-          </ul>
-        </article>
-      </div>
-    </section>
-  `,
-  styles: [`
-    .page { display: grid; gap: 1rem; }
-    .eyebrow { margin: 0; text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.75rem; color: #0284c7; }
-    h2 { margin: 0; }
-    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-    .panel { background: white; border-radius: 22px; padding: 1.5rem; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); }
-    h3 { margin-top: 0; }
-    ul { margin: 0; padding-left: 1.1rem; color: #475569; line-height: 1.8; }
-  `],
+   standalone: true,
+  imports: [CommonModule, CurrencyPipe, FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './checkout-page.component.html',
+  styleUrls: ['./checkout-page.component.css'],
 })
-export class CheckoutPageComponent {}
+export class CheckoutPageComponent {
+   private readonly api = inject(PosApiService);
+   private notification = inject(NotificationService);
+  protected readonly lines = this.api.getCartLines();
+  protected readonly total = computed(() =>
+    this.lines().reduce((sum, line) => sum + line.total, 0)
+  );
+  protected amountPaid = signal(0);
+  // protected changeDue = computed(() => this.amountPaid() - this.total());
+
+  protected changeDue = computed(() => {
+  const paid = this.amountPaid();
+  const total = this.total();
+  return paid - total;
+});
+
+  onAmountChange(event: Event) {
+  const value = (event.target as HTMLInputElement).value;
+  this.amountPaid.set(value ? Number(value) : 0);
+}
+
+protected isPaymentSufficient = computed(() =>
+  this.amountPaid() >= this.total()
+);
+
+
+  protected confirmOrder(): void {
+    // 🔥 Guard checks
+  if (!this.lines().length) return;
+
+  if (this.amountPaid() < this.total()) {
+    this.notification.error('Insufficient payment');
+    return;
+  }
+
+  const request = {
+    items: this.lines().map(line => ({
+      productId: line.sku,
+      quantity: line.quantity
+    })),
+    paymentType: 'CASH',
+    amountPaid: this.amountPaid()
+  };
+
+  this.api.checkout(request).subscribe({
+    next: (res: any) => {
+      // ✅ success
+      console.log('Order success:', res);
+      this.notification.success(`Order success: ${res}`);
+
+      // clear cart
+      this.api.clearCart();
+
+      // reset UI
+      this.amountPaid.set(0);
+
+      // optional: show success message
+      this.notification.success(`Order placed! Change: ${res.change}`);
+    },
+    error: (err) => {
+      console.error('Checkout failed', err);
+      this.notification.error('Checkout failed. Try again.');
+    }
+  });
+  }
+
+  protected cancelOrder(): void {
+    this.api.clearCart();
+  }
+}

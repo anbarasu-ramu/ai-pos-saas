@@ -52,6 +52,11 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./features/checkout/checkout-page.component').then((m) => m.CheckoutPageComponent),
   },
+   {
+    path: 'pos',
+    loadComponent: () =>
+      import('./features/pos/pos-component').then((m) => m.PosComponent),
+  },
   {
     path: 'ai-assistant',
     loadComponent: () =>

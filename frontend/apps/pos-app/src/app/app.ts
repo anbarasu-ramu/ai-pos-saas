@@ -13,10 +13,11 @@ export class App {
 
   private readonly navItems  = [
     { label: 'Dashboard', path: '/dashboard' , authenticationRequired: true},
-    { label: 'Products', path: '/products', authenticationRequired: true },
+    { label: 'Products', path: '/products', authenticationRequired: true ,adminOnly: true},
     { label: 'Inventory', path: '/inventory', authenticationRequired: true, adminOnly: true },
-    { label: 'Cart', path: '/cart' , authenticationRequired: true},
-    { label: 'Checkout', path: '/checkout' , authenticationRequired: true},
+    { label: 'Cart', path: '/cart' , authenticationRequired: true, adminOnly: true},
+    { label: 'Checkout', path: '/checkout' , authenticationRequired: true, adminOnly: true},
+    { label: 'Order', path: '/pos' , authenticationRequired: true},
     { label: 'AI Assistant', path: '/ai-assistant' , authenticationRequired: true},
     { label: 'Login', path: '/login' , authenticationRequired: false},
     { label: 'Register', path: '/register' , authenticationRequired: false},

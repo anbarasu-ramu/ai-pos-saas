@@ -24,6 +24,7 @@ export interface UserSession {
   email: string | null;
   username: string | null;
   tenantId: string | null;
+  tenantName: string | null;
   roles: string[];
 }
 
@@ -48,6 +49,7 @@ interface CurrentSessionResponse {
   username: string | null;
   roles: string[];
   tenantId: string | null;
+  tenantName: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -70,7 +72,10 @@ export class AuthService {
     return this.http.post<RegistrationResponse>(`${this.authApiBaseUrl}/register`, payload);
   }
 
-    createUser(payload: RegistrationRequest): Observable<RegistrationResponse> {
+    
+  
+  
+  createUser(payload: RegistrationRequest): Observable<RegistrationResponse> {
     return this.http.post<RegistrationResponse>(`${this.userApiBaseUrl}`, payload);
   }
 
@@ -143,6 +148,7 @@ export class AuthService {
         username: claims.preferred_username ?? null,
         tenantId: claims.tenant_id ?? null,
         roles: [],
+        tenantName: null
       };
 
       this.setSession(session);
@@ -214,6 +220,7 @@ export class AuthService {
       username: this.readStorage('session_username'),
       tenantId: this.readStorage('session_tenant_id'),
       roles: this.readStorage('session_roles')?.split(',').filter((role) => role.length > 0) ?? [],
+      tenantName: this.readStorage('session_tenant_name')
     };
 
     void this.hydrateSessionFromBackend();
@@ -253,6 +260,7 @@ export class AuthService {
     this.writeStorage('session_email', session.email ?? '');
     this.writeStorage('session_username', session.username ?? '');
     this.writeStorage('session_tenant_id', session.tenantId ?? '');
+    this.writeStorage('session_tenant_name', session.tenantName ?? '');
     this.writeStorage('session_roles', session.roles.join(','));
   }
 
@@ -291,6 +299,7 @@ export class AuthService {
         username: currentSession.username ?? this.session.username,
         tenantId: currentSession.tenantId ?? this.session.tenantId,
         roles: currentSession.roles ?? this.session.roles,
+        tenantName: currentSession.tenantName ?? this.session.tenantName,
       });
     } catch {
       // Keep the locally decoded session when profile hydration is unavailable.

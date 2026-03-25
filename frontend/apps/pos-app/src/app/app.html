@@ -1,10 +1,10 @@
 <div class="shell">
   <aside class="sidebar">
     <div>
-      <p class="eyebrow">AI POS SaaS</p>
-      <h1>Store cockpit</h1>
+      <p class="eyebrow">Your Store</p>
+      <h1>Point of Sale</h1>
       <p class="subcopy">
-        Starter workspace for auth, catalog, checkout, and AI-assisted operations.
+        Manage your products, handle sales, and run your store smoothly with smart assistance.
       </p>
     </div>
 
@@ -18,15 +18,13 @@
 
     @if (session(); as activeSession) {
       <section class="session-card">
-        <p class="session-label">Signed in</p>
+        <p class="session-label">Logged in as</p>
         @if (activeSession.username || activeSession.email) {
           <strong>{{ activeSession.username || activeSession.email }}</strong>
         }
-        @if (activeSession.email) {
-          <p class="session-meta">{{ activeSession.email }}</p>
-        }
-        @if (activeSession.tenantId) {
-          <p class="session-meta">Tenant: {{ activeSession.tenantId }}</p>
+        
+        @if (activeSession.tenantName) {
+          <p class="session-meta">Tenant: {{ activeSession.tenantName }}</p>
         }
         <button type="button" (click)="logout()">Logout</button>
       </section>

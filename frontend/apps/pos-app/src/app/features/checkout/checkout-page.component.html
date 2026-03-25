@@ -1,0 +1,37 @@
+<section class="page">
+    <p class="eyebrow">Checkout</p>
+
+    <h2>Review your order</h2>
+    <article class="card" *ngFor="let line of lines()">
+        <div>
+            <strong>{{ line.name }}</strong>
+        </div>
+
+        <div class="quantity">x{{ line.quantity }}</div>
+        <div class="total">{{ line.total | currency }}</div>
+
+    </article>
+    
+    <footer class="summary">
+        <span>Total</span>
+        <strong>{{ total() | currency }}</strong>
+    </footer>
+
+    <article class="card amount-card">
+        <div class="amount-container">
+            <label>Amount Paid</label>
+            <input type="number" [value]="amountPaid()" (input)="onAmountChange($event)" class="amount-paid-input" />
+        </div>
+    </article>
+
+    <article class="card amount-card">        
+        <div class="amount-container">
+            <label class="change-due" [class.negative]="!isPaymentSufficient()" [class.positive]="isPaymentSufficient()"> Change: {{ changeDue() | currency }}</label>
+        </div>
+    </article>
+
+    <div class="controls">
+        <button class="btn clear" (click)="cancelOrder()" [disabled]="lines().length===0">Cancel Order</button>
+        <button class="btn" (click)="confirmOrder()" [disabled]="!isPaymentSufficient() || lines().length===0">Confirm Order</button>
+    </div>
+</section>

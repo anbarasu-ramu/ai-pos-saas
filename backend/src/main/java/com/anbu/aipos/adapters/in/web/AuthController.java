@@ -1,10 +1,11 @@
 package com.anbu.aipos.adapters.in.web;
 
-import com.anbu.aipos.adapters.in.web.dto.RegisterUserRequest;
-import com.anbu.aipos.adapters.out.KeycloakAdminProperties;
-import com.anbu.aipos.application.RegistrationException;
+import com.anbu.aipos.adapters.in.web.dto.user.RegisterUserRequest;
+import com.anbu.aipos.adapters.out.keycloak.KeycloakAdminProperties;
+import com.anbu.aipos.application.exception.RegistrationException;
+import com.anbu.aipos.application.tenant.TenantQueryService;
 import com.anbu.aipos.common.web.ApiResponse;
-import com.anbu.aipos.core.port.in.RegisterUserUseCase;
+import com.anbu.aipos.core.port.in.register.RegisterUserUseCase;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,10 +23,12 @@ public class AuthController {
 
     private final RegisterUserUseCase registerUserUseCase;
     private final KeycloakAdminProperties keycloakProperties;
+    private final TenantQueryService tenantQueryService;
 
-    public AuthController(RegisterUserUseCase registerUserUseCase, KeycloakAdminProperties keycloakProperties) {
+    public AuthController(RegisterUserUseCase registerUserUseCase, KeycloakAdminProperties keycloakProperties, TenantQueryService tenantQueryService) {
         this.registerUserUseCase = registerUserUseCase;
         this.keycloakProperties = keycloakProperties;
+        this.tenantQueryService = tenantQueryService;
     }
 
     @GetMapping("/status")
@@ -41,13 +45,15 @@ public class AuthController {
 
     @GetMapping("/me")
     public MeResponse me(@AuthenticationPrincipal Jwt jwt) {
+        var tenantId = resolveTenantId(jwt);
         return new MeResponse(
                 true,
                 jwt.getSubject(),
                 jwt.getClaimAsString("email"),
                 jwt.getClaimAsString("preferred_username"),
                 extractRoles(jwt),
-                resolveTenantId(jwt));
+                tenantId,
+                this.tenantQueryService.findNameById(UUID.fromString(tenantId)));
     }
 
     @PostMapping("/register")
@@ -106,6 +112,7 @@ public class AuthController {
             String email,
             String username,
             List<String> roles,
-            String tenantId) {
+            String tenantId,
+            String tenantName) {
     }
 }

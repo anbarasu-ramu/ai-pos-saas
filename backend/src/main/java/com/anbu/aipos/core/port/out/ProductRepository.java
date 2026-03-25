@@ -14,4 +14,6 @@ public interface ProductRepository {
     Optional<Product> findByIdAndTenantId(Long id, String tenantId);
 
     void delete(Product product);
+
+    void saveAll(List<Product> productsToSave);
 }

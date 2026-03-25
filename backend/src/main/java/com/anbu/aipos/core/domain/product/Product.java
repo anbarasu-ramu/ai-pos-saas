@@ -1,8 +1,12 @@
 package com.anbu.aipos.core.domain.product;
 
+import lombok.Getter;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
+@Getter
+//@Setter
 public class Product {
     private final ProductId id;
     private String name;
@@ -10,7 +14,7 @@ public class Product {
     private BigDecimal price;
     private int stockQuantity;
     private boolean active;
-    private String tenantId;
+    private final String tenantId;
 
     // 🔒 Constructor (enforce invariants)
     public Product(ProductId id,
@@ -129,45 +133,6 @@ public class Product {
         }
     }
 
-    // ================================
-    // 📖 GETTERS (NO SETTERS)
-    // ================================
-
-    public ProductId getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public int getStockQuantity() {
-        return stockQuantity;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    // ================================
-    // ⚖️ EQUALITY (by identity)
-    // ================================
 
     @Override
     public boolean equals(Object o) {

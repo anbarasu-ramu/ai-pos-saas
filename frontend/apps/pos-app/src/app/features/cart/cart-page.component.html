@@ -1,12 +1,10 @@
 <section class="page">
-  <p class="eyebrow">Cart</p>
-  <h2>Current basket</h2>
+  <p  class="eyebrow">Cart</p>
 
-  <ng-container *ngIf="lines.length; else emptyCart">
-    <article class="card" *ngFor="let line of lines">
+  <ng-container *ngIf="lines().length; else emptyCart">
+    <article class="card" *ngFor="let line of lines()">
       <div>
-        <strong>{{ line.name }}</strong>
-        <p>{{ line.sku }}</p>
+        <strong>{{ line.name }}</strong>       
       </div>
 
       <div class="quantity">x{{ line.quantity }}</div>
@@ -25,11 +23,14 @@
     </footer>
 
     <div class="controls">
-      <button class="btn clear" (click)="clearCart()" [disabled]="lines.length===0">Clear Cart</button>
+      <button class="btn clear" (click)="clearCart()" [disabled]="lines().length===0">Clear Cart</button>
     </div>
   </ng-container>
 
-  <ng-template #emptyCart>
-    <p class="empty">Your cart is empty.</p>
-  </ng-template>
+<ng-template #emptyCart>
+  <div class="empty-cart-container">
+    <h2>Your cart is empty</h2>
+    <p>Start adding items to your cart to make a purchase.</p>
+  </div>
+</ng-template>
 </section>
