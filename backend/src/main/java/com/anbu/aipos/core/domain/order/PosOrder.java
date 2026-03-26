@@ -1,11 +1,15 @@
 package com.anbu.aipos.core.domain.order;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 //@Setter
@@ -19,11 +23,15 @@ public class PosOrder {
     private BigDecimal totalAmount = BigDecimal.ZERO;
     private String status;
     private String tenantId;
+    private UUID createdByUserId;
+    private String createdByUsername;
 
     // 🔥 Create order
-    public static PosOrder create(String tenantId) {
+    public static PosOrder create(String tenantId,UUID createdByUserId, String createdByUsername) {
         PosOrder order = new PosOrder();
         order.tenantId = tenantId;
+        order.createdByUserId = createdByUserId;
+        order.createdByUsername = createdByUsername;
         order.status = "CREATED";
         return order;
     }

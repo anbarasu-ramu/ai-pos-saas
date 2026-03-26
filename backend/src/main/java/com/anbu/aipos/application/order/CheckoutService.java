@@ -31,7 +31,7 @@ public class CheckoutService implements CheckoutUseCase {
     public CheckoutResponse checkout(CheckoutCommand command) {
 
         // 🔹 1. Create aggregate
-        PosOrder order = PosOrder.create(command.tenantId());
+        PosOrder order = PosOrder.create(command.tenantId(), command.createdByUserId(), command.createdByUsername());
 
         List<Product> productsToSave = new ArrayList<>();
 

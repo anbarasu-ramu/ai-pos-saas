@@ -2,6 +2,7 @@ package com.anbu.aipos.core.port.in.order;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 public interface CheckoutUseCase {
 
@@ -11,7 +12,9 @@ public interface CheckoutUseCase {
             List<Item> items,
             String paymentType,
             BigDecimal amountPaid,
-            String tenantId
+            String tenantId,
+            UUID createdByUserId,
+            String createdByUsername
     ) {}
 
     record Item(

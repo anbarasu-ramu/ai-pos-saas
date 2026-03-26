@@ -28,7 +28,7 @@ public class KeycloakAdminAdapter implements KeycloakAdminPort {
     }
 
     @Override
-    public void createUser(UserProvisioningRequest registration) {
+    public String createUser(UserProvisioningRequest registration) {
         String accessToken = null;
         String userId = null;
 
@@ -49,7 +49,10 @@ public class KeycloakAdminAdapter implements KeycloakAdminPort {
             rollbackUser(accessToken, userId);
             throw new RegistrationException("Unable to provision the tenant administrator.", HttpStatus.BAD_GATEWAY, ex);
         }
+        return userId;
     }
+
+
 
     private String fetchAccessToken() {
         MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
@@ -135,6 +138,13 @@ public class KeycloakAdminAdapter implements KeycloakAdminPort {
                 .retrieve()
                 .toBodilessEntity();
     }
+
+    @Override
+    public void deleteUser(String userId) {
+        String accessToken = fetchAccessToken();
+        deleteUser(accessToken, userId);
+    }
+
 
     private void deleteUser(String accessToken, String userId) {
         restClient.delete()

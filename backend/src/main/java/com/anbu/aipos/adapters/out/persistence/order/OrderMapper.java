@@ -12,6 +12,8 @@ public class OrderMapper {
         entity.setTotalAmount(order.getTotalAmount());
         entity.setStatus(order.getStatus());
         entity.setTenantId(order.getTenantId());
+        entity.setCreatedByUserId(order.getCreatedByUserId());
+        entity.setCreatedByUsername(order.getCreatedByUsername());
         return entity;
     }
 

@@ -22,7 +22,7 @@ public class CheckoutController {
     @PostMapping
     public CheckoutApiResponse checkout(@RequestBody CheckoutRequest request, @AuthenticationPrincipal Jwt jwt) {
         String tenantId = jwt.getClaim("tenant_id");
-        var command = CheckoutMapper.toCommand(request,tenantId);
+        var command = CheckoutMapper.toCommand(request,jwt);
         var result = checkoutUseCase.checkout(command);
         return CheckoutMapper.toResponse(result);
     }
