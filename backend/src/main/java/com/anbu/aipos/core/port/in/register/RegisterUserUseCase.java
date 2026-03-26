@@ -1,5 +1,9 @@
 package com.anbu.aipos.core.port.in.register;
 
+import com.anbu.aipos.adapters.out.persistence.tenant.domain.TenantEntity;
+
+import java.util.UUID;
+
 public interface RegisterUserUseCase {
 
     RegistrationResult register(RegistrationCommand command);
@@ -14,4 +18,6 @@ public interface RegisterUserUseCase {
             String role,
             String loginUrl) {
     }
+
+     record TenantContext(UUID tenantId, TenantEntity savedTenant) {}
 }

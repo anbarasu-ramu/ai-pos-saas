@@ -1,11 +1,13 @@
 package com.anbu.aipos.application.user;
 
 import com.anbu.aipos.adapters.out.keycloak.KeycloakAdminProperties;
+import com.anbu.aipos.adapters.out.persistence.tenant.domain.TenantEntity;
+import com.anbu.aipos.adapters.out.persistence.tenant.repository.TenantJpaRepository;
+import com.anbu.aipos.adapters.out.persistence.user.StaffUserRepository;
 import com.anbu.aipos.application.exception.RegistrationException;
 import com.anbu.aipos.core.port.in.register.RegisterUserUseCase;
 import com.anbu.aipos.core.port.out.KeycloakAdminPort;
-import com.anbu.aipos.adapters.out.persistence.tenant.domain.TenantEntity;
-import com.anbu.aipos.adapters.out.persistence.tenant.repository.TenantJpaRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -15,6 +17,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class RegisterUserService implements RegisterUserUseCase {
 
     private static final String TENANT_ADMIN_ROLE = "TENANT_ADMIN";
@@ -22,23 +25,84 @@ public class RegisterUserService implements RegisterUserUseCase {
     private final TenantJpaRepository tenantRepository;
     private final KeycloakAdminPort keycloakAdminPort;
     private final KeycloakAdminProperties keycloakProperties;
+    private final StaffUserRepository staffUserRepository;
+    private final StaffUserService staffUserService;
 
     public RegisterUserService(
             TenantJpaRepository tenantRepository,
             KeycloakAdminPort keycloakAdminPort,
-            KeycloakAdminProperties keycloakProperties) {
+            KeycloakAdminProperties keycloakProperties, StaffUserRepository staffUserRepository, StaffUserService staffUserService) {
         this.tenantRepository = tenantRepository;
         this.keycloakAdminPort = keycloakAdminPort;
         this.keycloakProperties = keycloakProperties;
+        this.staffUserRepository = staffUserRepository;
+        this.staffUserService = staffUserService;
     }
 
     @Override
     public RegistrationResult register(RegistrationCommand command) {
         validatePassword(command.password());
+        String userId = null;
+        var tenantContext = createTenant(command);
+
+        try {
+            userId = createKeycloakUser(command, tenantContext);
+            this.staffUserService.createStaffUser(command.email(), userId, tenantContext.tenantId(),TENANT_ADMIN_ROLE);
+        } catch (Exception ex) {
+            rollback(ex, userId, tenantContext);
+        }
+
+        return new RegistrationResult(
+                "Registration successful. Please log in.",
+                command.email().trim().toLowerCase(Locale.ROOT),
+                tenantContext.tenantId().toString(),
+                TENANT_ADMIN_ROLE,
+                buildLoginUrl());
+    }
+
+    private void rollback(Exception ex, String userId, TenantContext tenantContext) {
+        // 🔥 rollback Keycloak user
+        if (userId != null) {
+            try {
+                keycloakAdminPort.deleteUser(userId);
+            } catch (Exception rollbackEx) {
+                log.error("Failed to rollback Keycloak user {}", userId, rollbackEx);
+            }
+        }
+
+        // 🔥 rollback tenant
+        tenantRepository.delete(tenantContext.savedTenant());
+        tenantRepository.flush();
+
+        if (ex instanceof RegistrationException re) {
+            throw re;
+        }
+
+        throw new RegistrationException(
+                "Registration failed. Please try again.",
+                HttpStatus.BAD_GATEWAY,
+                ex);
+    }
+
+
+
+    private String createKeycloakUser(RegistrationCommand command, TenantContext tenantContext) {
+        String userId;
+        userId =  keycloakAdminPort.createUser(new KeycloakAdminPort.UserProvisioningRequest(
+                command.email().trim().toLowerCase(Locale.ROOT),
+                command.password(),
+                        tenantContext.tenantId().toString(),
+                TENANT_ADMIN_ROLE));
+        return userId;
+    }
+
+
+    private TenantContext createTenant(RegistrationCommand command) {
 
         String tenantName = command.tenantName().trim();
         UUID tenantId = UUID.randomUUID();
         String slug = slugify(tenantName);
+        String userId = null;
 
         validateTenantName(tenantName, slug);
 
@@ -49,28 +113,7 @@ public class RegisterUserService implements RegisterUserUseCase {
 
         TenantEntity savedTenant = tenantRepository.saveAndFlush(tenant);
 
-        try {
-            keycloakAdminPort.createUser(new KeycloakAdminPort.UserProvisioningRequest(
-                    command.email().trim().toLowerCase(Locale.ROOT),
-                    command.password(),
-                    tenantId.toString(),
-                    TENANT_ADMIN_ROLE));
-        } catch (RegistrationException ex) {
-            tenantRepository.delete(savedTenant);
-            tenantRepository.flush();
-            throw ex;
-        } catch (RuntimeException ex) {
-            tenantRepository.delete(savedTenant);
-            tenantRepository.flush();
-            throw new RegistrationException("Registration failed. Please try again.", HttpStatus.BAD_GATEWAY, ex);
-        }
-
-        return new RegistrationResult(
-                "Registration successful. Please log in.",
-                command.email().trim().toLowerCase(Locale.ROOT),
-                tenantId.toString(),
-                TENANT_ADMIN_ROLE,
-                buildLoginUrl());
+        return new TenantContext(tenantId, savedTenant);
     }
 
     private String buildLoginUrl() {

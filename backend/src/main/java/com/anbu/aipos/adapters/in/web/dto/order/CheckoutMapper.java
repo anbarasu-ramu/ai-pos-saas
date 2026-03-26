@@ -2,18 +2,22 @@ package com.anbu.aipos.adapters.in.web.dto.order;
 
 
 import com.anbu.aipos.core.port.in.order.CheckoutUseCase;
+import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CheckoutMapper {
 
-    public static CheckoutUseCase.CheckoutCommand toCommand(CheckoutRequest request,String tenantId) {
+    public static CheckoutUseCase.CheckoutCommand toCommand(CheckoutRequest request, Jwt jwt) {
         return new CheckoutUseCase.CheckoutCommand(
                 request.items().stream()
                         .map(i -> new CheckoutUseCase.Item(i.productId(), i.quantity()))
                         .collect(Collectors.toList()),
                 request.paymentType(),
-                request.amountPaid(),tenantId
+                request.amountPaid(),jwt.getClaim("tenant_id"),
+                UUID.fromString(jwt.getSubject()),
+                jwt.getClaimAsString("preferred_username")
         );
     }
 

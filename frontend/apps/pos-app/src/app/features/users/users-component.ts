@@ -85,6 +85,8 @@ export class UsersComponent {
       const response = await firstValueFrom(this.authService.createUser(this.form.getRawValue()));
       this.successMessage = response.message;
       this.isSubmitting = false;
+      this.resetForm();
+      console.log('User created successfully:', this.successMessage);
       // window.setTimeout(() => {
       //   void this.authService.login(response.email);
       // }, 800);

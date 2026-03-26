@@ -2,7 +2,8 @@ package com.anbu.aipos.core.port.out;
 
 public interface KeycloakAdminPort {
 
-    void createUser(UserProvisioningRequest registration);
+    String createUser(UserProvisioningRequest registration);
+    void deleteUser(String userId);
 
     record UserProvisioningRequest(
             String email,

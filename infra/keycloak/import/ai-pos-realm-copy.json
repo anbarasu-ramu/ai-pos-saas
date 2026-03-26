@@ -1,0 +1,160 @@
+{
+  "realm": "ai-pos",
+  "enabled": true,
+  "displayName": "AI POS SaaS",
+  "registrationAllowed": false,
+  "rememberMe": true,
+  "resetPasswordAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "TENANT_ADMIN",
+        "description": "Tenant administrator"
+      },
+      {
+        "name": "CASHIER",
+        "description": "Point-of-sale operator"
+      }
+    ]
+  },
+  "clientScopes": [
+    {
+      "name": "tenant",
+      "description": "Adds tenant_id to issued tokens",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "pos-client",
+      "name": "POS Frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:4200/auth/callback",
+        "http://localhost:4200/*",
+        "http://127.0.0.1:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200",
+        "http://127.0.0.1:4200"
+      ],
+      "defaultClientScopes": [
+        "profile",
+        "email",
+        "roles",
+        "tenant"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    },
+    {
+      "clientId": "pos-admin-service",
+      "name": "POS Admin Service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "pos-admin-service-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "defaultClientScopes": [
+        "profile",
+        "email",
+        "roles"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Store",
+      "lastName": "Admin",
+      "email": "admin@ai-pos.local",
+      "attributes": {
+        "tenant_id": [
+          "00000000-0000-0000-0000-000000000001"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "TENANT_ADMIN"
+      ]
+    },
+    {
+      "username": "cashier",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Store",
+      "lastName": "Cashier",
+      "email": "cashier@ai-pos.local",
+      "attributes": {
+        "tenant_id": [
+          "00000000-0000-0000-0000-000000000001"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "cashier123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "CASHIER"
+      ]
+    },
+    {
+      "username": "service-account-pos-admin-service",
+      "enabled": true,
+      "serviceAccountClientId": "pos-admin-service",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users",
+          "query-users"
+        ]
+      }
+    }
+  ]
+}
