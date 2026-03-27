@@ -1,0 +1,21 @@
+$kind: http-request
+name: Orders
+url: "{{baseUrl}}/api/orders"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{access_token}}
+body:
+  type: text
+  content: |-
+    {
+      "items": [
+        {
+          "productId": 3,
+          "quantity": 2
+        }
+      ],
+      "paymentType": "CASH",
+      "amountPaid": 15000.00
+    }
+order: 2385667612054471

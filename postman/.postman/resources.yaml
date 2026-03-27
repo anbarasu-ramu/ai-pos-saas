@@ -5,6 +5,9 @@ workspace:
 localResources:
   collections:
     - ../ai-pos-saas-local.postman_collection.json
+    - ../ai-pos-saas-e2e-local.postman_collection.json
+  environments:
+    - ../ai-pos-saas-e2e-local.postman_environment.json
 
 # Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
 cloudResources:

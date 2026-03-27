@@ -1,4 +1,4 @@
-package com.anbu.aipos.adapters.in.web;
+package com.anbu.aipos.adapters.in.web.user;
 
 import com.anbu.aipos.adapters.in.web.dto.user.RegisterUserRequest;
 import com.anbu.aipos.adapters.out.keycloak.KeycloakAdminProperties;

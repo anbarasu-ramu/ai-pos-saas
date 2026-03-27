@@ -1,2 +1,17 @@
 name: Globals
-values: []
+values:
+  - key: baseUrl
+    value: 'http://localhost:8080'
+    enabled: true
+  - key: keycloakBaseUrl
+    value: 'http://localhost:8081'
+    enabled: true
+  - key: keycloakAdminBaseUrl
+    value: 'http://localhost:8081'
+    enabled: true
+  - key: realm
+    value: ai-pos
+    enabled: true
+  - key: clientId
+    value: pos-client
+    enabled: true

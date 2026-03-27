@@ -1,0 +1,20 @@
+$kind: http-request
+name: Tenant Admin Login
+url: "{{keycloakBaseUrl}}/realms/{{realm}}/protocol/openid-connect/token"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: text
+  content: grant_type=password&client_id={{clientId}}&username={{tenantAdminEmail}}&password={{tenantAdminPassword}}
+order: 1000
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Repeatable tenant admin login returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      const json = pm.response.json();
+      pm.environment.set("tenantAdminToken", json.access_token);
+    language: text/javascript

@@ -1,6 +1,28 @@
 $kind: http-request
-url: "{{baseUrl}}/api/tenant/current"
+url: '{{baseUrl}}/api/tenant/current'
 method: GET
 headers:
-  Authorization: Bearer {{access_token}}
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
 order: 4000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response has a JSON body", function () {
+        pm.response.to.be.json;
+      });
+
+      pm.test("Response contains tenant info", function () {
+        const json = pm.response.json();
+        const hasTenantInfo = json.hasOwnProperty("id") ||
+                              json.hasOwnProperty("tenantId") ||
+                              json.hasOwnProperty("name") ||
+                              json.hasOwnProperty("tenantName") ||
+                              json.hasOwnProperty("tenant");
+        pm.expect(hasTenantInfo, "Expected tenant info fields (id, tenantId, name, tenantName, or tenant) in response").to.be.true;
+      });

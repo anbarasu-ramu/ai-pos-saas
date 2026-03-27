@@ -1,4 +1,4 @@
-package com.anbu.aipos.adapters.in.web;
+package com.anbu.aipos.adapters.in.web.user;
 
 import java.util.Map;
 import org.springframework.http.HttpStatus;

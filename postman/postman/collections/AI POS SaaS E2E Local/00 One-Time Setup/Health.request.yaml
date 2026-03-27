@@ -1,0 +1,17 @@
+$kind: http-request
+name: Health
+url: "{{baseUrl}}/actuator/health"
+method: GET
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Health endpoint returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Health endpoint reports UP", function () {
+        const json = pm.response.json();
+        pm.expect(json.status).to.eql("UP");
+      });

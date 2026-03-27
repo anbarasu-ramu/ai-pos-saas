@@ -1,0 +1,23 @@
+$kind: http-request
+name: Tenant Admin Login
+url: "{{keycloakBaseUrl}}/realms/{{realm}}/protocol/openid-connect/token"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: text
+  content: grant_type=password&client_id={{clientId}}&scope=profile%20email%20roles%20tenant&username={{tenantAdminEmail}}&password={{tenantAdminPassword}}
+order: 1400
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Tenant admin login returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Tenant admin login returns an access token", function () {
+        const json = pm.response.json();
+        pm.expect(json.access_token).to.be.a("string").and.not.empty;
+        pm.environment.set("tenantAdminToken", json.access_token);
+      });
+    language: text/javascript

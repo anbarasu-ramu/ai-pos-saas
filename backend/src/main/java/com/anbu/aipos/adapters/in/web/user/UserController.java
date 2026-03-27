@@ -1,4 +1,4 @@
-package com.anbu.aipos.adapters.in.web;
+package com.anbu.aipos.adapters.in.web.user;
 
 import com.anbu.aipos.adapters.in.web.dto.user.CreateUserRequest;
 import com.anbu.aipos.application.user.UserService;

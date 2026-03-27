@@ -1,0 +1,24 @@
+$kind: http-request
+name: Order History
+url: "{{baseUrl}}/api/orders?page=0&size=20"
+method: GET
+headers:
+  - key: Authorization
+    value: Bearer {{cashierToken}}
+order: 1700
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Order history returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Order history contains the created order", function () {
+        const json = pm.response.json();
+        pm.expect(json.content).to.be.an("array");
+
+        const order = json.content.find(item => String(item.id) === pm.environment.get("orderId"));
+        pm.expect(order, "Expected order id to be present in order history").to.exist;
+        pm.expect(order.createdByUsername).to.eql(pm.environment.get("cashierUsername"));
+      });

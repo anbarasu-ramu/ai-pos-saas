@@ -1,0 +1,7 @@
+$kind: collection
+name: AI POS Auth Test Collection
+variables:
+  - key: baseUrl
+    value: 'http://localhost:8080'
+  - key: access_token
+    value: ''

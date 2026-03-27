@@ -1,0 +1,23 @@
+$kind: http-request
+name: Register Tenant Admin
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{tenantAdminEmail}}",
+      "password": "{{tenantAdminPassword}}",
+      "tenantName": "{{tenantName}}"
+    }
+order: 1300
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Register tenant admin returns success or already-exists response", function () {
+        pm.expect([200, 409]).to.include(pm.response.code);
+      });

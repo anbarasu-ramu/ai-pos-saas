@@ -23,3 +23,19 @@ export interface AiSuggestion {
   title: string;
   detail: string;
 }
+
+export interface OrderSummary {
+  id: number;
+  totalAmount: number;
+  status: string;
+  createdAt: string;
+  createdByUsername: string;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}

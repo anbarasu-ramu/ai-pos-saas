@@ -1,4 +1,4 @@
-package com.anbu.aipos.adapters.in.web;
+package com.anbu.aipos.adapters.in.web.product;
 
 import com.anbu.aipos.adapters.in.web.dto.product.CreateProductRequest;
 import com.anbu.aipos.application.product.ProductService;

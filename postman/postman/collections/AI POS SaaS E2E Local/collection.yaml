@@ -1,0 +1,7 @@
+$kind: collection
+name: AI POS SaaS E2E Local
+description: >-
+  End-to-end backend collection for AI POS SaaS. Import and select the `AI POS
+  SaaS E2E Local` environment before running the collection. The local Keycloak
+  realm import must have direct access grants enabled for `pos-client` so
+  Postman can obtain user tokens for the automated flow.

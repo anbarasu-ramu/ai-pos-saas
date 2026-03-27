@@ -1,0 +1,27 @@
+$kind: http-request
+name: Create Cashier
+url: "{{baseUrl}}/api/users"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: Bearer {{tenantAdminToken}}
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{cashierEmail}}",
+      "password": "{{cashierPassword}}",
+      "firstName": "Malar",
+      "lastName": "Cashier",
+      "role": "CASHIER"
+    }
+order: 1600
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Create cashier returns success or a duplicate-friendly error", function () {
+        pm.expect([200, 201, 400, 409, 502]).to.include(pm.response.code);
+      });
