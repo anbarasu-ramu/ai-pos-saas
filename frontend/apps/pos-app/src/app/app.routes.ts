@@ -4,7 +4,7 @@ export const appRoutes: Route[] = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'dashboard',
+    redirectTo: 'login',
   },
   {
     path: 'login',
@@ -51,6 +51,11 @@ export const appRoutes: Route[] = [
     path: 'checkout',
     loadComponent: () =>
       import('./features/checkout/checkout-page.component').then((m) => m.CheckoutPageComponent),
+  },
+  {
+    path: 'orders',
+    loadComponent: () =>
+      import('./features/orders/orders-page.component').then((m) => m.OrdersPageComponent),
   },
    {
     path: 'pos',

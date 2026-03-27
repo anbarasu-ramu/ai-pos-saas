@@ -1,0 +1,20 @@
+$kind: http-request
+name: Tenant Current - Admin
+url: "{{baseUrl}}/api/tenant/current"
+method: GET
+headers:
+  - key: Authorization
+    value: Bearer {{tenantAdminToken}}
+order: 1200
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Tenant current returns 200 for tenant admin", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Tenant current returns the expected tenant id", function () {
+        const json = pm.response.json();
+        pm.expect(json.tenant_id).to.eql(pm.environment.get("tenantId"));
+      });

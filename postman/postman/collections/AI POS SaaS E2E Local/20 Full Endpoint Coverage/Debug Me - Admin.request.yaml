@@ -1,0 +1,21 @@
+$kind: http-request
+name: Debug Me - Admin
+url: "{{baseUrl}}/api/debug/me"
+method: GET
+headers:
+  - key: Authorization
+    value: Bearer {{tenantAdminToken}}
+order: 1400
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Debug me returns 200 for tenant admin", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Debug me returns tenant admin context", function () {
+        const json = pm.response.json();
+        pm.expect(json.email).to.eql(pm.variables.get("tenantAdminEmail"));
+        pm.expect(json.tenant_id).to.eql(pm.environment.get("tenantId"));
+      });

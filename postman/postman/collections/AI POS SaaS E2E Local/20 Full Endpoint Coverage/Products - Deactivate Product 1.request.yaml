@@ -1,0 +1,15 @@
+$kind: http-request
+name: Products - Deactivate Product 1
+url: "{{baseUrl}}/api/products/{{product1Id}}"
+method: DELETE
+headers:
+  - key: Authorization
+    value: Bearer {{tenantAdminToken}}
+order: 1700
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Deactivate product returns 200", function () {
+        pm.response.to.have.status(200);
+      });

@@ -1,0 +1,31 @@
+$kind: http-request
+name: AI Chat
+url: "{{baseUrl}}/api/ai/chat"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: Bearer {{tenantAdminToken}}
+body:
+  type: json
+  content: |-
+    {
+      "message": "Show low stock items"
+    }
+order: 2000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("AI chat returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("AI chat returns the scaffold response shape", function () {
+        const json = pm.response.json();
+        pm.expect(json.message).to.be.a("string");
+        pm.expect(json.data.message).to.be.a("string");
+        pm.expect(json.data.userPrompt).to.eql("Show low stock items");
+        pm.expect(json.data.suggestedActions).to.be.an("array");
+      });

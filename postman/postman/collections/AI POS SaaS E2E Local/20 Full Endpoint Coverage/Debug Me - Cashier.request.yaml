@@ -1,0 +1,21 @@
+$kind: http-request
+name: Debug Me - Cashier
+url: "{{baseUrl}}/api/debug/me"
+method: GET
+headers:
+  - key: Authorization
+    value: Bearer {{cashierToken}}
+order: 1500
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Debug me returns 200 for cashier", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Debug me returns cashier context", function () {
+        const json = pm.response.json();
+        pm.expect(json.email).to.eql(pm.variables.get("cashierEmail"));
+        pm.expect(json.tenant_id).to.eql(pm.environment.get("tenantId"));
+      });

@@ -1,0 +1,22 @@
+$kind: http-request
+name: Products - List
+url: "{{baseUrl}}/api/products"
+method: GET
+headers:
+  - key: Authorization
+    value: Bearer {{tenantAdminToken}}
+order: 1900
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Product list returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Product list still contains both created products", function () {
+        const json = pm.response.json();
+        const ids = json.map(product => String(product.id));
+        pm.expect(ids).to.include(pm.environment.get("product1Id"));
+        pm.expect(ids).to.include(pm.environment.get("product2Id"));
+      });

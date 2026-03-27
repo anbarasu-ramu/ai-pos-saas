@@ -1,0 +1,15 @@
+$kind: http-request
+name: Products - Activate Product 1
+url: "{{baseUrl}}/api/products/{{product1Id}}/activate"
+method: PUT
+headers:
+  - key: Authorization
+    value: Bearer {{tenantAdminToken}}
+order: 1800
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Activate product returns 200", function () {
+        pm.response.to.have.status(200);
+      });

@@ -1,4 +1,4 @@
-package com.anbu.aipos.adapters.in.web;
+package com.anbu.aipos.adapters.in.web.user;
 
 public record RegisterUserResponse(
         String message,

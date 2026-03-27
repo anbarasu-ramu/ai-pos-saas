@@ -1,0 +1,18 @@
+$kind: http-request
+name: Auth Status
+url: "{{baseUrl}}/api/auth/status"
+method: GET
+order: 1100
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Auth status returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Auth status exposes Keycloak metadata", function () {
+        const json = pm.response.json();
+        pm.expect(json.data.provider).to.eql("keycloak");
+        pm.expect(json.data.realm).to.eql(pm.variables.get("realm"));
+      });

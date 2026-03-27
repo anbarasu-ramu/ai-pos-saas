@@ -1,0 +1,23 @@
+$kind: http-request
+name: Cashier Login
+url: "{{keycloakBaseUrl}}/realms/{{realm}}/protocol/openid-connect/token"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: text
+  content: grant_type=password&client_id={{clientId}}&username={{cashierEmail}}&password={{cashierPassword}}
+order: 1700
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Cashier login returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Cashier login returns an access token", function () {
+        const json = pm.response.json();
+        pm.expect(json.access_token).to.be.a("string").and.not.empty;
+        pm.environment.set("cashierToken", json.access_token);
+      });
+    language: text/javascript

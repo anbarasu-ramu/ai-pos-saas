@@ -1,0 +1,59 @@
+<section class="page">
+  <header class="hero">
+    <p class="eyebrow">Orders</p>
+    <h1>Recent order activity</h1>
+    <p class="subcopy">Track completed checkouts and see who created each order.</p>
+  </header>
+
+  <ng-container *ngIf="isLoading(); else ordersState">
+    <article class="state-card">
+      <p>Loading orders...</p>
+    </article>
+  </ng-container>
+
+  <ng-template #ordersState>
+    <ng-container *ngIf="!errorMessage(); else errorState">
+      <ng-container *ngIf="orders().length; else emptyState">
+        <article class="order-card" *ngFor="let order of orders()">
+          <div class="order-main">
+            <p class="label">Order ID</p>
+            <strong>#{{ order.id }}</strong>
+          </div>
+
+          <div>
+            <p class="label">Created By</p>
+            <span>{{ order.createdByUsername || 'Unknown' }}</span>
+          </div>
+
+          <div>
+            <p class="label">Status</p>
+            <span class="status">{{ order.status }}</span>
+          </div>
+
+          <div class="order-total">
+            <p class="label">Total</p>
+            <strong>{{ order.totalAmount | currency }}</strong>
+          </div>
+
+          <div class="order-date">
+            <p class="label">Created At</p>
+            <span>{{ order.createdAt | date: 'medium' }}</span>
+          </div>
+        </article>
+      </ng-container>
+    </ng-container>
+  </ng-template>
+
+  <ng-template #errorState>
+    <article class="state-card error">
+      <p>{{ errorMessage() }}</p>
+      <button class="btn" type="button" (click)="loadOrders()">Retry</button>
+    </article>
+  </ng-template>
+
+  <ng-template #emptyState>
+    <article class="state-card">
+      <p>No orders found yet.</p>
+    </article>
+  </ng-template>
+</section>

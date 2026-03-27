@@ -18,6 +18,7 @@ export class App {
     { label: 'Cart', path: '/cart' , authenticationRequired: true, adminOnly: true},
     { label: 'Checkout', path: '/checkout' , authenticationRequired: true, adminOnly: true},
     { label: 'Order', path: '/pos' , authenticationRequired: true},
+    { label: 'Orders', path: '/orders' , authenticationRequired: true},
     { label: 'AI Assistant', path: '/ai-assistant' , authenticationRequired: true},
     { label: 'Login', path: '/login' , authenticationRequired: false},
     { label: 'Register', path: '/register' , authenticationRequired: false},

@@ -1,4 +1,4 @@
-package com.anbu.aipos.adapters.in.web;
+package com.anbu.aipos.adapters.in.web.test;
 
 import com.anbu.aipos.config.TenantContext;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,0 +1,32 @@
+$kind: http-request
+name: Create Product 1
+url: "{{baseUrl}}/api/products"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: Bearer {{tenantAdminToken}}
+body:
+  type: json
+  content: |-
+    {
+      "name": "Filter Coffee",
+      "category": "Beverages",
+      "price": 25.00,
+      "stockQuantity": 100
+    }
+order: 1100
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Create product 1 returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Create product 1 returns a product id", function () {
+        const json = pm.response.json();
+        pm.expect(json.id).to.not.eql(null);
+        pm.environment.set("product1Id", String(json.id));
+      });

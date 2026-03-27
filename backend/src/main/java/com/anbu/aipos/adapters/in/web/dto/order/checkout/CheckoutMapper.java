@@ -1,4 +1,4 @@
-package com.anbu.aipos.adapters.in.web.dto.order;
+package com.anbu.aipos.adapters.in.web.dto.order.checkout;
 
 
 import com.anbu.aipos.core.port.in.order.CheckoutUseCase;

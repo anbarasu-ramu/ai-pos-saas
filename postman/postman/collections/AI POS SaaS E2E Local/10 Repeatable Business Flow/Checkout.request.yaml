@@ -1,0 +1,44 @@
+$kind: http-request
+name: Checkout
+url: "{{baseUrl}}/api/checkout"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: Bearer {{cashierToken}}
+body:
+  type: json
+  content: |-
+    {
+      "items": [
+        {
+          "productId": {{product1Id}},
+          "quantity": 2
+        },
+        {
+          "productId": {{product2Id}},
+          "quantity": 1
+        }
+      ],
+      "paymentType": "CASH",
+      "amountPaid": 100.00,
+      "createdByUserId": "{{cashierUserId}}",
+      "createdByUsername": "{{cashierUsername}}"
+    }
+order: 1600
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Checkout returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Checkout completes the order", function () {
+        const json = pm.response.json();
+        pm.expect(json.orderId).to.be.a("number");
+        pm.expect(json.status).to.eql("COMPLETED");
+        pm.expect(json.items).to.have.length(2);
+        pm.environment.set("orderId", String(json.orderId));
+      });

@@ -1,0 +1,935 @@
+{
+  "info": {
+    "_postman_id": "3d0ed18e-8938-43d4-a8bc-3b5682334684",
+    "name": "AI POS SaaS E2E Local",
+    "description": "End-to-end backend collection for AI POS SaaS. Import and select the `AI POS SaaS E2E Local` environment before running the collection. The local Keycloak realm import must have direct access grants enabled for `pos-client` so Postman can obtain user tokens for the automated flow.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [],
+  "item": [
+    {
+      "name": "00 One-Time Setup",
+      "item": [
+        {
+          "name": "Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Health endpoint returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Health endpoint reports UP\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.status).to.eql(\"UP\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        },
+        {
+          "name": "Auth Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Auth status returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Auth status exposes Keycloak metadata\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data.provider).to.eql(\"keycloak\");",
+                  "  pm.expect(json.data.realm).to.eql(pm.variables.get(\"realm\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "status"]
+            }
+          }
+        },
+        {
+          "name": "Register Tenant Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Register tenant admin returns success or already-exists response\", function () {",
+                  "  pm.expect([200, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{tenantAdminEmail}}\",\n  \"password\": \"{{tenantAdminPassword}}\",\n  \"tenantName\": \"{{tenantName}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Tenant Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Tenant admin login returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Tenant admin login returns an access token\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.access_token).to.be.a(\"string\").and.not.empty;",
+                  "  pm.environment.set(\"tenantAdminToken\", json.access_token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "grant_type=password&client_id={{clientId}}&scope=openid%20profile%20email%20roles%20tenant&username={{tenantAdminEmail}}&password={{tenantAdminPassword}}"
+            },
+            "url": {
+              "raw": "{{keycloakBaseUrl}}/realms/{{realm}}/protocol/openid-connect/token",
+              "host": ["{{keycloakBaseUrl}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+            }
+          }
+        },
+        {
+          "name": "Tenant Admin Auth Me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Tenant admin auth/me returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Tenant admin auth/me returns expected tenant admin user\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.email).to.eql(pm.variables.get(\"tenantAdminEmail\"));",
+                  "  pm.expect(json.roles).to.include(\"TENANT_ADMIN\");",
+                  "  pm.expect(json.tenantId).to.be.a(\"string\").and.not.empty;",
+                  "",
+                  "  pm.environment.set(\"tenantId\", json.tenantId);",
+                  "  pm.environment.set(\"tenantAdminUserId\", json.subject);",
+                  "  pm.environment.set(\"tenantAdminUsername\", json.username);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Create Cashier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Create cashier returns success or a duplicate-friendly error\", function () {",
+                  "  pm.expect([200, 201, 400, 409, 502]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{cashierEmail}}\",\n  \"password\": \"{{cashierPassword}}\",\n  \"firstName\": \"Malar\",\n  \"lastName\": \"Cashier\",\n  \"role\": \"CASHIER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            }
+          }
+        },
+        {
+          "name": "Cashier Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Cashier login returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Cashier login returns an access token\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.access_token).to.be.a(\"string\").and.not.empty;",
+                  "  pm.environment.set(\"cashierToken\", json.access_token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "grant_type=password&client_id={{clientId}}&scope=openid%20profile%20email%20roles%20tenant&username={{cashierEmail}}&password={{cashierPassword}}"
+            },
+            "url": {
+              "raw": "{{keycloakBaseUrl}}/realms/{{realm}}/protocol/openid-connect/token",
+              "host": ["{{keycloakBaseUrl}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+            }
+          }
+        },
+        {
+          "name": "Cashier Auth Me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Cashier auth/me returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Cashier auth/me returns expected cashier user\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.email).to.eql(pm.variables.get(\"cashierEmail\"));",
+                  "  pm.expect(json.roles).to.include(\"CASHIER\");",
+                  "  pm.expect(json.tenantId).to.eql(pm.environment.get(\"tenantId\"));",
+                  "",
+                  "  pm.environment.set(\"cashierUserId\", json.subject);",
+                  "  pm.environment.set(\"cashierUsername\", json.username);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{cashierToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Repeatable Business Flow",
+      "item": [
+        {
+          "name": "Tenant Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Repeatable tenant admin login returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.environment.set(\"tenantAdminToken\", json.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "grant_type=password&client_id={{clientId}}&scope=openid%20profile%20email%20roles%20tenant&username={{tenantAdminEmail}}&password={{tenantAdminPassword}}"
+            },
+            "url": {
+              "raw": "{{keycloakBaseUrl}}/realms/{{realm}}/protocol/openid-connect/token",
+              "host": ["{{keycloakBaseUrl}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+            }
+          }
+        },
+        {
+          "name": "Create Product 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Create product 1 returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Create product 1 returns a product id\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.eql(null);",
+                  "  pm.environment.set(\"product1Id\", String(json.id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Filter Coffee\",\n  \"category\": \"Beverages\",\n  \"price\": 25.00,\n  \"stockQuantity\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            }
+          }
+        },
+        {
+          "name": "Create Product 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Create product 2 returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Create product 2 returns a product id\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.id).to.not.eql(null);",
+                  "  pm.environment.set(\"product2Id\", String(json.id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Masala Tea\",\n  \"category\": \"Beverages\",\n  \"price\": 20.00,\n  \"stockQuantity\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            }
+          }
+        },
+        {
+          "name": "List Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"List products returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"List products contains the created products\", function () {",
+                  "  const json = pm.response.json();",
+                  "  const ids = json.map(product => String(product.id));",
+                  "  pm.expect(ids).to.include(pm.environment.get(\"product1Id\"));",
+                  "  pm.expect(ids).to.include(pm.environment.get(\"product2Id\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            }
+          }
+        },
+        {
+          "name": "Cashier Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Repeatable cashier login returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "pm.environment.set(\"cashierToken\", json.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "grant_type=password&client_id={{clientId}}&scope=openid%20profile%20email%20roles%20tenant&username={{cashierEmail}}&password={{cashierPassword}}"
+            },
+            "url": {
+              "raw": "{{keycloakBaseUrl}}/realms/{{realm}}/protocol/openid-connect/token",
+              "host": ["{{keycloakBaseUrl}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+            }
+          }
+        },
+        {
+          "name": "Cashier Only",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Cashier-only endpoint returns 200 for cashier\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{cashierToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cashier/only",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cashier", "only"]
+            }
+          }
+        },
+        {
+          "name": "Checkout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Checkout returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Checkout completes the order\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.orderId).to.be.a(\"number\");",
+                  "  pm.expect(json.status).to.eql(\"COMPLETED\");",
+                  "  pm.expect(json.items).to.have.length(2);",
+                  "  pm.environment.set(\"orderId\", String(json.orderId));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{cashierToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": {{product1Id}},\n      \"quantity\": 2\n    },\n    {\n      \"productId\": {{product2Id}},\n      \"quantity\": 1\n    }\n  ],\n  \"paymentType\": \"CASH\",\n  \"amountPaid\": 100.00,\n  \"createdByUserId\": \"{{cashierUserId}}\",\n  \"createdByUsername\": \"{{cashierUsername}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "checkout"]
+            }
+          }
+        },
+        {
+          "name": "Order History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Order history returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Order history contains the created order\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.content).to.be.an(\"array\");",
+                  "",
+                  "  const order = json.content.find(item => String(item.id) === pm.environment.get(\"orderId\"));",
+                  "  pm.expect(order, \"Expected order id to be present in order history\").to.exist;",
+                  "  pm.expect(order.createdByUsername).to.eql(pm.environment.get(\"cashierUsername\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{cashierToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "20 Full Endpoint Coverage",
+      "item": [
+        {
+          "name": "Admin Only",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Admin-only endpoint returns 200 for tenant admin\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/only",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "only"]
+            }
+          }
+        },
+        {
+          "name": "Cashier Only",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Cashier-only endpoint returns 200 for cashier\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{cashierToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cashier/only",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cashier", "only"]
+            }
+          }
+        },
+        {
+          "name": "Tenant Current - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Tenant current returns 200 for tenant admin\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Tenant current returns the expected tenant id\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.tenant_id).to.eql(pm.environment.get(\"tenantId\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/current",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tenant", "current"]
+            }
+          }
+        },
+        {
+          "name": "Tenant Current - Cashier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Tenant current returns 200 for cashier\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Cashier tenant current returns the expected tenant id\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.tenant_id).to.eql(pm.environment.get(\"tenantId\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{cashierToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenant/current",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tenant", "current"]
+            }
+          }
+        },
+        {
+          "name": "Debug Me - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Debug me returns 200 for tenant admin\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Debug me returns tenant admin context\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.email).to.eql(pm.variables.get(\"tenantAdminEmail\"));",
+                  "  pm.expect(json.tenant_id).to.eql(pm.environment.get(\"tenantId\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/debug/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "debug", "me"]
+            }
+          }
+        },
+        {
+          "name": "Debug Me - Cashier",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Debug me returns 200 for cashier\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Debug me returns cashier context\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.email).to.eql(pm.variables.get(\"cashierEmail\"));",
+                  "  pm.expect(json.tenant_id).to.eql(pm.environment.get(\"tenantId\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{cashierToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/debug/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "debug", "me"]
+            }
+          }
+        },
+        {
+          "name": "Products - Update Product 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Update product returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Update product returns updated details\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(String(json.id)).to.eql(pm.environment.get(\"product1Id\"));",
+                  "  pm.expect(json.name).to.eql(\"Filter Coffee Large\");",
+                  "  pm.expect(Number(json.stockQuantity)).to.eql(120);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Filter Coffee Large\",\n  \"category\": \"Beverages\",\n  \"price\": 30.00,\n  \"stockQuantity\": 120\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{product1Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{product1Id}}"]
+            }
+          }
+        },
+        {
+          "name": "Products - Deactivate Product 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Deactivate product returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{product1Id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{product1Id}}"]
+            }
+          }
+        },
+        {
+          "name": "Products - Activate Product 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Activate product returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{product1Id}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{product1Id}}", "activate"]
+            }
+          }
+        },
+        {
+          "name": "Products - List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Product list returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Product list still contains both created products\", function () {",
+                  "  const json = pm.response.json();",
+                  "  const ids = json.map(product => String(product.id));",
+                  "  pm.expect(ids).to.include(pm.environment.get(\"product1Id\"));",
+                  "  pm.expect(ids).to.include(pm.environment.get(\"product2Id\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            }
+          }
+        },
+        {
+          "name": "AI Chat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"AI chat returns 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"AI chat returns the scaffold response shape\", function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.message).to.be.a(\"string\");",
+                  "  pm.expect(json.data.message).to.be.a(\"string\");",
+                  "  pm.expect(json.data.userPrompt).to.eql(\"Show low stock items\");",
+                  "  pm.expect(json.data.suggestedActions).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tenantAdminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Show low stock items\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ai/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ai", "chat"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

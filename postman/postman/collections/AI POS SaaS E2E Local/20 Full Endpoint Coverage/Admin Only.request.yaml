@@ -1,0 +1,15 @@
+$kind: http-request
+name: Admin Only
+url: "{{baseUrl}}/api/admin/only"
+method: GET
+headers:
+  - key: Authorization
+    value: Bearer {{tenantAdminToken}}
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Admin-only endpoint returns 200 for tenant admin", function () {
+        pm.response.to.have.status(200);
+      });

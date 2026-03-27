@@ -1,0 +1,15 @@
+$kind: http-request
+name: Cashier Only
+url: "{{baseUrl}}/api/cashier/only"
+method: GET
+headers:
+  - key: Authorization
+    value: Bearer {{cashierToken}}
+order: 1500
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Cashier-only endpoint returns 200 for cashier", function () {
+        pm.response.to.have.status(200);
+      });

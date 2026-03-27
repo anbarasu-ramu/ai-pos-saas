@@ -1,0 +1,26 @@
+$kind: http-request
+name: Tenant Admin Auth Me
+url: "{{baseUrl}}/api/auth/me"
+method: GET
+headers:
+  - key: Authorization
+    value: Bearer {{tenantAdminToken}}
+order: 1500
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Tenant admin auth/me returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Tenant admin auth/me returns expected tenant admin user", function () {
+        const json = pm.response.json();
+        pm.expect(json.email).to.eql(pm.variables.get("tenantAdminEmail"));
+        pm.expect(json.roles).to.include("TENANT_ADMIN");
+        pm.expect(json.tenantId).to.be.a("string").and.not.empty;
+
+        pm.environment.set("tenantId", json.tenantId);
+        pm.environment.set("tenantAdminUserId", json.subject);
+        pm.environment.set("tenantAdminUsername", json.username);
+      });

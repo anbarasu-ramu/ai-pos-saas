@@ -1,8 +1,8 @@
-package com.anbu.aipos.adapters.in.web;
+package com.anbu.aipos.adapters.in.web.order.checkout;
 
-import com.anbu.aipos.adapters.in.web.dto.order.CheckoutApiResponse;
-import com.anbu.aipos.adapters.in.web.dto.order.CheckoutMapper;
-import com.anbu.aipos.adapters.in.web.dto.order.CheckoutRequest;
+import com.anbu.aipos.adapters.in.web.dto.order.checkout.CheckoutApiResponse;
+import com.anbu.aipos.adapters.in.web.dto.order.checkout.CheckoutMapper;
+import com.anbu.aipos.adapters.in.web.dto.order.checkout.CheckoutRequest;
 import com.anbu.aipos.core.port.in.order.CheckoutUseCase;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;

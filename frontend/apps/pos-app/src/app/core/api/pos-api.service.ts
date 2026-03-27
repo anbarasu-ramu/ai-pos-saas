@@ -3,10 +3,12 @@ import {
   AiSuggestion,
   CartLine,
   MetricCard,
+  OrderSummary,
+  PageResponse,
   ProductSummary,
 } from './pos.models';
 import { signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class PosApiService {
@@ -111,13 +113,21 @@ export class PosApiService {
     this.cartLines.set([]);
   }
 
-    confirmOrder() {
+  confirmOrder() {
     throw new Error('Method not implemented.');
   }
 
   checkout(request: any) {
   return this.http.post('/api/checkout', request);
 }
+
+  getOrders(page = 0, size = 20) {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+
+    return this.http.get<PageResponse<OrderSummary>>('/api/orders', { params });
+  }
 
   // 🔹 AI suggestions (unchanged)
   getAiSuggestions(): AiSuggestion[] {
