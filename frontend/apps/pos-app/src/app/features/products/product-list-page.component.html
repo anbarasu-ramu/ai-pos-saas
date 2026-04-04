@@ -1,65 +1,48 @@
 <section class="page">
-
   <p  class="eyebrow">Products</p>
 
-  <div class="table">
+  <div class="grid-shell">
+    <ag-grid-angular
+      class="ag-theme-quartz app-grid-theme product-grid"
+      [modules]="modules"
+      [rowData]="products"
+      [columnDefs]="columnDefs"
+      [defaultColDef]="defaultColDef"
+      [pagination]="true"
+      [paginationPageSize]="pageSize"
+      [paginationPageSizeSelector]="false"
+      [suppressPaginationPanel]="true"
+      [animateRows]="true"
+      [suppressCellFocus]="true"
+      [headerHeight]="52"
+      [rowHeight]="60"
+      (gridReady)="onGridReady($event)"
+      (firstDataRendered)="onFirstDataRendered($event)"
+      (gridSizeChanged)="onGridSizeChanged($event)"
+      (paginationChanged)="onPaginationChanged($event)">
+    </ag-grid-angular>
 
-    <!-- 🔹 Header -->
-    <div class="row header" [ngClass]="isInventoryView ? 'inventory' : 'cashier'">
-      <div class="cell">Name</div>
-      <div class="cell">Category</div>
-      <div class="cell" *ngIf="isInventoryView">Stock</div>
-      <div class="cell">Price</div>
+    <footer class="pagination-bar" *ngIf="totalRows > 0">
+      <button
+        class="btn"
+        type="button"
+        [disabled]="!hasPreviousPage()"
+        (click)="previousPage()">
+        Previous
+      </button>
 
-      <div class="cell" *ngIf="!isInventoryView">Add</div>
-
-      <ng-container *ngIf="isInventoryView">
-        <div class="cell">Edit</div>
-        <div class="cell">Deactivate</div>
-      </ng-container>
-    </div>
-
-    <!-- 🔹 Rows -->
-    <div class="row" [ngClass]="isInventoryView ? 'inventory' : 'cashier'" *ngFor="let product of products">
-
-      <div class="cell">{{ product.name }}</div>
-      <div class="cell">{{ product.category }}</div>
-      <div class="cell" *ngIf="isInventoryView">{{ product.stockQuantity }}</div>
-      <div class="cell">{{ product.price | currency }}</div>
-
-      <!-- Cashier -->
-      <div class="cell" *ngIf="!isInventoryView">
-        <button class="btn" (click)="onAddToCart(product)">
-          Add to Cart
-        </button>
+      <div class="pagination-copy">
+        <strong>{{ pageLabel() }}</strong>
+        <span>{{ resultsLabel() }}</span>
       </div>
 
-      <!-- Admin -->
-      <ng-container *ngIf="isInventoryView">
-
-        <div class="cell">
-          <button
-            class="btn btn-wide"
-            [disabled]="!product.active"
-            [class.disabled-btn]="!product.active"
-            (click)="onEdit(product)">
-            Edit
-          </button>
-        </div>
-
-        <div class="cell">
-          <button
-            class="btn btn-wide"
-            [class.activate-btn]="!product.active"
-            (click)="onToggleActive(product)">
-            {{ product.active ? 'Deactivate' : 'Activate' }}
-          </button>
-        </div>
-
-      </ng-container>
-
-    </div>
-
+      <button
+        class="btn"
+        type="button"
+        [disabled]="!hasNextPage()"
+        (click)="nextPage()">
+        Next
+      </button>
+    </footer>
   </div>
-
 </section>

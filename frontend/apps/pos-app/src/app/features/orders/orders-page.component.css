@@ -4,7 +4,7 @@
 }
 
 .hero,
-.order-card,
+.grid-card,
 .state-card {
   background: white;
   border-radius: 22px;
@@ -38,30 +38,65 @@
   color: #64748b;
 }
 
-.order-card {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  padding: 1.25rem;
-  align-items: center;
+.grid-card {
+  overflow: hidden;
 }
 
-.order-main strong,
-.order-total strong {
-  color: #0f172a;
-  font-size: 1.1rem;
+.orders-grid {
+  height: min(68vh, 720px);
+  --ag-border-radius: 22px;
+  --ag-wrapper-border-radius: 22px;
+  --ag-wrapper-border: none;
 }
 
-.status {
+:host ::ng-deep .orders-grid .status-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 88px;
+  min-width: 96px;
   padding: 0.4rem 0.75rem;
   border-radius: 999px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+:host ::ng-deep .orders-grid .status-chip-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+:host ::ng-deep .orders-grid .status-chip-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+:host ::ng-deep .orders-grid .status-chip-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+:host ::ng-deep .orders-grid .status-chip-neutral {
   background: #e0f2fe;
   color: #0369a1;
-  font-weight: 700;
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-wrap: wrap;
+}
+
+.pagination-copy {
+  display: grid;
+  gap: 0.2rem;
+  justify-items: center;
+  text-align: center;
+  color: #475569;
 }
 
 .state-card {
@@ -83,4 +118,19 @@
   color: white;
   padding: 0.7rem 1.3rem;
   cursor: pointer;
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .orders-grid {
+    height: min(62vh, 620px);
+  }
+
+  .pagination-bar {
+    justify-content: center;
+  }
 }

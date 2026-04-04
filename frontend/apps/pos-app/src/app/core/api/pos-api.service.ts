@@ -1,7 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import {
+  AiAssistantResponse,
   AiSuggestion,
+  ApiResponse,
   CartLine,
+  CheckoutRequest,
   MetricCard,
   OrderSummary,
   PageResponse,
@@ -117,9 +120,9 @@ export class PosApiService {
     throw new Error('Method not implemented.');
   }
 
-  checkout(request: any) {
-  return this.http.post('/api/checkout', request);
-}
+  checkout(request: CheckoutRequest) {
+    return this.http.post('/api/checkout', request);
+  }
 
   getOrders(page = 0, size = 20) {
     const params = new HttpParams()
@@ -129,12 +132,16 @@ export class PosApiService {
     return this.http.get<PageResponse<OrderSummary>>('/api/orders', { params });
   }
 
+  chatWithAssistant(message: string) {
+    return this.http.post<ApiResponse<AiAssistantResponse>>('/api/ai/chat', { message });
+  }
+
   // 🔹 AI suggestions (unchanged)
   getAiSuggestions(): AiSuggestion[] {
     return [
-      { title: 'Restock signal', detail: 'Blueberry Muffin is below the preferred threshold for the lunch rush.' },
-      { title: 'Upsell idea', detail: 'Bundle paper cups with coffee beans for wholesale buyers.' },
-      { title: 'Checkout guardrail', detail: 'Prompt for tenant-aware stock validation before payment capture.' },
+      { title: 'Low-stock sweep', detail: 'Show low stock under 3 units' },
+      { title: 'Catalog lookup', detail: 'Find cappuccino products for the current tenant' },
+      { title: 'Daily summary', detail: 'Show today\'s sales summary' },
     ];
   }
 }

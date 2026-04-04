@@ -1,6 +1,7 @@
 package com.anbu.aipos.adapters.in.web.product;
 
 import com.anbu.aipos.adapters.in.web.dto.product.CreateProductRequest;
+import com.anbu.aipos.adapters.in.web.dto.product.ProductSearchResponse;
 import com.anbu.aipos.application.product.ProductService;
 import com.anbu.aipos.core.port.in.product.CreateProductCommand;
 import com.anbu.aipos.core.port.in.product.ProductView;
@@ -52,6 +53,35 @@ public class ProductController {
     public List<ProductView> list(@AuthenticationPrincipal Jwt jwt) {
         String tenantId = jwt.getClaim("tenant_id");
         return productService.getAll(tenantId);
+    }
+
+    @GetMapping("/{productId}")
+    public ProductView getById(@PathVariable Long productId,
+                               @AuthenticationPrincipal Jwt jwt) {
+
+        String tenantId = jwt.getClaim("tenant_id");
+        return productService.getById(productId, tenantId);
+    }
+
+    @GetMapping("/search")
+    public ProductSearchResponse search(@RequestParam String q,
+                                        @RequestParam(defaultValue = "true") boolean activeOnly,
+                                        @RequestParam(defaultValue = "10") int limit,
+                                        @AuthenticationPrincipal Jwt jwt) {
+
+        String tenantId = jwt.getClaim("tenant_id");
+        int normalizedLimit = Math.max(1, Math.min(limit, 50));
+        var products = productService.search(tenantId, q, activeOnly, normalizedLimit);
+        return new ProductSearchResponse(q, normalizedLimit, products.size(), products);
+    }
+
+    @GetMapping("/low-stock")
+    public List<ProductView> getLowStockProducts(@RequestParam(defaultValue = "5") int threshold,
+                                                 @AuthenticationPrincipal Jwt jwt) {
+
+        String tenantId = jwt.getClaim("tenant_id");
+        int normalizedThreshold = Math.max(0, threshold);
+        return productService.getLowStockProducts(tenantId, normalizedThreshold);
     }
 
     @PutMapping("/{productId}")

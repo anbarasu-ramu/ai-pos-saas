@@ -22,16 +22,16 @@ services:
     networks:
       - ai-pos-network
 
-  # ollama:
-  #   image: ollama/ollama
-  #   container_name: ollama
-  #   restart: unless-stopped
-  #   ports:
-  #     - "11434:11434"
-  #   volumes:
-  #     - ollama_data:/root/.ollama
-  #   networks:
-  #     - ai-pos-network
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ai-pos-network
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.1
@@ -50,70 +50,72 @@ services:
     networks:
       - ai-pos-network
 
-  backend:
-    build:
-      context: ./backend
-      dockerfile_inline: |
-        FROM maven:3.9.9-eclipse-temurin-21 AS builder
-        WORKDIR /app
-        COPY pom.xml ./
-        COPY src ./src
-        RUN mvn clean package -DskipTests
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile_inline: |
+  #       FROM maven:3.9.9-eclipse-temurin-21 AS builder
+  #       WORKDIR /app
+  #       COPY pom.xml ./
+  #       COPY src ./src
+  #       RUN mvn clean package -DskipTests
 
-        FROM eclipse-temurin:21-jre
-        WORKDIR /app
-        COPY --from=builder /app/target/*.jar app.jar
-        EXPOSE 8080
-        ENTRYPOINT ["java", "-jar", "/app/app.jar"]
-    container_name: pos-backend
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-      keycloak:
-        condition: service_started
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pos
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: pass
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/ai-pos
-      APP_KEYCLOAK_PUBLIC_BASE_URL: http://localhost:8081
-      APP_KEYCLOAK_ADMIN_BASE_URL: http://keycloak:8080
-      APP_KEYCLOAK_REALM: ai-pos
-      APP_KEYCLOAK_CLIENT_ID: pos-client
-      APP_KEYCLOAK_REDIRECT_URI: http://localhost:4200
-      APP_KEYCLOAK_ADMIN_CLIENT_ID: pos-admin-service
-      APP_KEYCLOAK_ADMIN_CLIENT_SECRET: pos-admin-service-secret
-      OLLAMA_BASE_URL: http://host.docker.internal:11434
-    ports:
-      - "8080:8080"
-    networks:
-      - ai-pos-network
+  #       FROM eclipse-temurin:21-jre
+  #       WORKDIR /app
+  #       COPY --from=builder /app/target/*.jar app.jar
+  #       EXPOSE 8080
+  #       ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+  #   container_name: pos-backend
+  #   restart: unless-stopped
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     ollama:
+  #       condition: service_started
+  #     keycloak:
+  #       condition: service_started
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pos
+  #     SPRING_DATASOURCE_USERNAME: user
+  #     SPRING_DATASOURCE_PASSWORD: pass
+  #     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/ai-pos
+  #     APP_KEYCLOAK_PUBLIC_BASE_URL: http://localhost:8081
+  #     APP_KEYCLOAK_ADMIN_BASE_URL: http://keycloak:8080
+  #     APP_KEYCLOAK_REALM: ai-pos
+  #     APP_KEYCLOAK_CLIENT_ID: pos-client
+  #     APP_KEYCLOAK_REDIRECT_URI: http://localhost:4200
+  #     APP_KEYCLOAK_ADMIN_CLIENT_ID: pos-admin-service
+  #     APP_KEYCLOAK_ADMIN_CLIENT_SECRET: pos-admin-service-secret
+  #     OLLAMA_BASE_URL: http://ollama:11434
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - ai-pos-network
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile_inline: |
-        FROM node:22-alpine AS builder
-        WORKDIR /app
-        COPY package.json package-lock.json ./
-        RUN npm install
-        COPY . .
-        RUN npx nx build pos-app
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile_inline: |
+  #       FROM node:22-alpine AS builder
+  #       WORKDIR /app
+  #       COPY package.json package-lock.json ./
+  #       RUN npm install
+  #       COPY . .
+  #       RUN npx nx build pos-app
 
-        FROM nginx:1.27-alpine
-        COPY --from=builder /app/dist/apps/pos-app /usr/share/nginx/html
-        EXPOSE 80
-        CMD ["nginx", "-g", "daemon off;"]
-    container_name: pos-frontend
-    restart: unless-stopped
-    depends_on:
-      backend:
-        condition: service_started
-    ports:
-      - "4200:80"
-    networks:
-      - ai-pos-network
+  #       FROM nginx:1.27-alpine
+  #       COPY --from=builder /app/dist/apps/pos-app /usr/share/nginx/html
+  #       EXPOSE 80
+  #       CMD ["nginx", "-g", "daemon off;"]
+  #   container_name: pos-frontend
+  #   restart: unless-stopped
+  #   depends_on:
+  #     backend:
+  #       condition: service_started
+  #   ports:
+  #     - "4200:80"
+  #   networks:
+  #     - ai-pos-network
 
   pgadmin:
     image: dpage/pgadmin4

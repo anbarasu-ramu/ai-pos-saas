@@ -22,9 +22,7 @@ body:
         }
       ],
       "paymentType": "CASH",
-      "amountPaid": 100.00,
-      "createdByUserId": "{{cashierUserId}}",
-      "createdByUsername": "{{cashierUsername}}"
+      "amountPaid": 100.00
     }
 order: 1600
 scripts:

@@ -63,6 +63,11 @@ public class Product {
         this.name = newName;
     }
 
+    public void updateCategory(String newCategory) {
+        validateName(newCategory);
+        this.category = newCategory;
+    }
+
     public void updatePrice(BigDecimal newPrice) {
         validatePrice(newPrice);
         this.price = newPrice;
