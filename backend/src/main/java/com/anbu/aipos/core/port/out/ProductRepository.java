@@ -9,9 +9,15 @@ public interface ProductRepository {
 
     Product save(Product product);
 
+    boolean existsByTenantIdAndNameIgnoreCase(String tenantId, String name);
+
     List<Product> findByTenantId(String tenantId);
 
     Optional<Product> findByIdAndTenantId(Long id, String tenantId);
+
+    List<Product> search(String tenantId, String query, boolean activeOnly, int limit);
+
+    List<Product> findLowStockProducts(String tenantId, int threshold);
 
     void delete(Product product);
 

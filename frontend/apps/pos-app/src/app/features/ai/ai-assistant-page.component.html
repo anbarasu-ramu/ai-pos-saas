@@ -1,0 +1,256 @@
+<section class="page">
+  <header class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Tenant Admin Copilot</p>
+      <h2>Read-first operations intelligence for stock, orders, and daily performance</h2>
+      <p class="lede">
+        Ask for low-stock risk, product lookup, order history, order detail, or daily sales.
+        The assistant uses the backend orchestration layer and now surfaces clarifications instead of vague failures.
+      </p>
+    </div>
+
+    <div class="hero-status">
+      <span class="status-dot"></span>
+      <div>
+        <strong>Read-first mode</strong>
+        <p>Uses <code>/api/ai/chat</code>, renders structured results, and keeps write actions confirmation-gated.</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="workspace">
+    <article class="panel chat-panel">
+      <div class="panel-head">
+        <div>
+          <p class="panel-label">Conversation</p>
+          <h3>Admin operations chat</h3>
+        </div>
+        <button type="button" class="ghost-button" (click)="resetConversation()">Clear</button>
+      </div>
+
+      <div class="suggestions">
+        <button
+          *ngFor="let suggestion of suggestions"
+          type="button"
+          class="suggestion-chip"
+          (click)="applySuggestion(suggestion)"
+        >
+          <span>{{ suggestion.title }}</span>
+          <small>{{ suggestion.detail }}</small>
+        </button>
+      </div>
+
+      <div class="transcript">
+        <article
+          *ngFor="let message of messages(); trackBy: trackMessage"
+          class="bubble"
+          [class.bubble-user]="message.role === 'user'"
+          [class.bubble-assistant]="message.role === 'assistant'"
+        >
+          <div class="bubble-meta">
+            <span>{{ message.role === 'user' ? 'You' : 'Assistant' }}</span>
+            <time>{{ message.timestamp }}</time>
+          </div>
+          <p>{{ message.text }}</p>
+        </article>
+
+        <article *ngIf="isLoading()" class="bubble bubble-assistant bubble-loading">
+          <div class="bubble-meta">
+            <span>Assistant</span>
+            <time>Working</time>
+          </div>
+          <p>Thinking through the request and checking which backend tools to use...</p>
+        </article>
+      </div>
+
+      <form class="composer" (ngSubmit)="sendMessage()">
+        <label class="composer-label" for="assistant-message">Prompt</label>
+        <textarea
+          id="assistant-message"
+          name="assistantMessage"
+          [(ngModel)]="draft"
+          rows="4"
+          placeholder="Example: Show low stock under 3 units"
+          [disabled]="isLoading()"
+        ></textarea>
+
+        <div class="composer-actions">
+          <p class="hint">Use natural language. Read-only admin questions are optimized first, and mutating actions still need explicit confirmation.</p>
+          <div class="action-row">
+            <button
+              *ngIf="canConfirmLastAction()"
+              type="button"
+              class="secondary-button"
+              (click)="confirmLastAction()"
+              [disabled]="isLoading()"
+            >
+              Confirm last action
+            </button>
+            <button type="submit" class="primary-button" [disabled]="isLoading() || !draft.trim()">
+              {{ isLoading() ? 'Sending...' : 'Send to assistant' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </article>
+
+    <aside class="panel insight-panel">
+      <div class="panel-head">
+        <div>
+          <p class="panel-label">Latest result</p>
+          <h3>Structured assistant output</h3>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-label">Intent</span>
+        <strong>{{ latestResponse()?.intent || 'No request yet' }}</strong>
+        <p>{{ latestResponse()?.assistantMessage || 'Ask something to see the orchestration response.' }}</p>
+      </div>
+
+      <div class="summary-card" *ngIf="latestStructuredResult() as result">
+        <span class="summary-label">Result type</span>
+        <strong>{{ resultTypeLabel(result) }}</strong>
+        <div class="highlight-grid" *ngIf="latestHighlights().length">
+          <article class="highlight-card" *ngFor="let highlight of latestHighlights()">
+            <span>{{ highlight.label }}</span>
+            <strong>{{ highlight.value }}</strong>
+          </article>
+        </div>
+      </div>
+
+      <div class="detail-card" *ngIf="asClarificationResult(latestStructuredResult()) as clarification">
+        <div class="detail-head">
+          <span class="summary-label">Clarification</span>
+        </div>
+        <p class="detail-copy">The assistant found multiple close matches for <strong>{{ clarification.query }}</strong>.</p>
+        <article class="match-card" *ngFor="let option of clarification.options">
+          <div class="tool-row">
+            <strong>{{ option.product.name }}</strong>
+            <span class="status-pill status-info">{{ option.matchType }}</span>
+          </div>
+          <p>{{ option.product.category }} · Stock {{ option.product.stockQuantity }} · Confidence {{ option.confidence | number:'1.2-2' }}</p>
+          <small>{{ option.reason }}</small>
+        </article>
+      </div>
+
+      <div class="detail-card" *ngIf="asProductSearchResult(latestStructuredResult()) as search">
+        <div class="detail-head">
+          <span class="summary-label">Product matches</span>
+        </div>
+        <article class="match-card" *ngFor="let match of search.matches">
+          <div class="tool-row">
+            <strong>{{ match.product.name }}</strong>
+            <span class="status-pill">{{ match.matchType }}</span>
+          </div>
+          <p>{{ match.product.category }} · Stock {{ match.product.stockQuantity }} · {{ match.confidence | number:'1.2-2' }}</p>
+          <small>{{ match.reason }}</small>
+        </article>
+      </div>
+
+      <div class="detail-card" *ngIf="asLowStockResult(latestStructuredResult()) as lowStock">
+        <div class="detail-head">
+          <span class="summary-label">Low-stock items</span>
+        </div>
+        <article class="compact-row" *ngFor="let item of lowStock.items">
+          <strong>{{ item.name }}</strong>
+          <span>{{ item.category }}</span>
+          <span>Stock {{ item.stockQuantity }}</span>
+        </article>
+      </div>
+
+      <div class="detail-card" *ngIf="asOrderListResult(latestStructuredResult()) as orders">
+        <div class="detail-head">
+          <span class="summary-label">Recent orders</span>
+        </div>
+        <article class="compact-row" *ngFor="let order of orders.items">
+          <strong>#{{ order.id }}</strong>
+          <span>{{ order.status }}</span>
+          <span>{{ order.createdByUsername }}</span>
+        </article>
+      </div>
+
+      <div class="detail-card" *ngIf="asOrderDetailResult(latestStructuredResult()) as detail">
+        <div class="detail-head">
+          <span class="summary-label">Order detail</span>
+        </div>
+        <article class="compact-row" *ngFor="let item of detail.order.items">
+          <strong>Product {{ item.productId }}</strong>
+          <span>Qty {{ item.quantity }}</span>
+          <span>Line {{ item.lineTotal | number:'1.2-2' }}</span>
+        </article>
+      </div>
+
+      <div class="detail-card" *ngIf="asDailySummaryResult(latestStructuredResult()) as daily">
+        <div class="detail-head">
+          <span class="summary-label">Daily summary</span>
+        </div>
+        <article class="compact-row">
+          <strong>Date</strong>
+          <span>{{ daily.businessDate }}</span>
+          <span>{{ daily.zone }}</span>
+        </article>
+        <article class="compact-row">
+          <strong>Completed</strong>
+          <span>{{ daily.summary.completedOrders }}</span>
+          <span>Avg {{ daily.summary.averageOrderValue | number:'1.2-2' }}</span>
+        </article>
+      </div>
+
+      <div class="detail-card" *ngIf="asUserContextResult(latestStructuredResult()) as userContext">
+        <div class="detail-head">
+          <span class="summary-label">User context</span>
+        </div>
+        <article class="compact-row">
+          <strong>{{ userContext.user.username }}</strong>
+          <span>{{ userContext.user.email }}</span>
+          <span>{{ userContext.user.roles.join(', ') }}</span>
+        </article>
+      </div>
+
+      <div class="detail-card" *ngIf="asTenantContextResult(latestStructuredResult()) as tenantContext">
+        <div class="detail-head">
+          <span class="summary-label">Tenant context</span>
+        </div>
+        <article class="compact-row">
+          <strong>{{ tenantContext.tenant.tenantName }}</strong>
+          <span>{{ tenantContext.tenant.tenantId }}</span>
+        </article>
+      </div>
+
+      <div class="tool-list" *ngIf="latestResponse()?.toolInvocations?.length; else emptyTools">
+        <article class="tool-card" *ngFor="let invocation of latestResponse()?.toolInvocations">
+          <div class="tool-row">
+            <strong>{{ invocation.tool }}</strong>
+            <span class="status-pill" [class.status-warning]="invocation.status !== 'SUCCESS'">
+              {{ invocation.status }}
+            </span>
+          </div>
+          <pre>{{ formatJson(invocation.arguments) }}</pre>
+          <p *ngIf="invocation.errorMessage" class="error-text">{{ invocation.errorMessage }}</p>
+        </article>
+      </div>
+
+      <ng-template #emptyTools>
+        <div class="empty-state">
+          <p>No tool calls yet.</p>
+        </div>
+      </ng-template>
+
+      <div class="payload-card">
+        <div class="payload-head">
+          <span class="summary-label">Raw JSON</span>
+          <button
+            type="button"
+            class="ghost-button"
+            (click)="copyLatestResult()"
+            [disabled]="!latestResponse()"
+          >
+            Copy JSON
+          </button>
+        </div>
+        <pre>{{ latestResultPreview() }}</pre>
+      </div>
+    </aside>
+  </section>
+</section>

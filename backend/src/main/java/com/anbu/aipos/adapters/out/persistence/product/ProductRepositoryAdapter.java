@@ -2,6 +2,7 @@ package com.anbu.aipos.adapters.out.persistence.product;
 
 import com.anbu.aipos.core.domain.product.Product;
 import com.anbu.aipos.core.port.out.ProductRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,6 +26,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
+    public boolean existsByTenantIdAndNameIgnoreCase(String tenantId, String name) {
+        return jpaRepository.existsByTenantIdAndNameIgnoreCase(tenantId, name);
+    }
+
+    @Override
     public void saveAll(List<Product> productsToSave) {
         jpaRepository.saveAll(productsToSave.stream().map(mapper::toEntity).toList());
     }
@@ -41,6 +47,30 @@ public class ProductRepositoryAdapter implements ProductRepository {
     public Optional<Product> findByIdAndTenantId(Long id, String tenantId) {
         return jpaRepository.findByIdAndTenantId(id, tenantId)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Product> search(String tenantId, String query, boolean activeOnly, int limit) {
+        return jpaRepository.searchByTenantId(
+                        tenantId,
+                        query,
+                        activeOnly,
+                        PageRequest.of(0, limit)
+                )
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Product> findLowStockProducts(String tenantId, int threshold) {
+        return jpaRepository.findByTenantIdAndActiveTrueAndStockQuantityLessThanEqualOrderByStockQuantityAscNameAsc(
+                        tenantId,
+                        threshold
+                )
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override

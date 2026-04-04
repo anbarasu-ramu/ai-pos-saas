@@ -524,7 +524,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [\n    {\n      \"productId\": {{product1Id}},\n      \"quantity\": 2\n    },\n    {\n      \"productId\": {{product2Id}},\n      \"quantity\": 1\n    }\n  ],\n  \"paymentType\": \"CASH\",\n  \"amountPaid\": 100.00,\n  \"createdByUserId\": \"{{cashierUserId}}\",\n  \"createdByUsername\": \"{{cashierUsername}}\"\n}"
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": {{product1Id}},\n      \"quantity\": 2\n    },\n    {\n      \"productId\": {{product2Id}},\n      \"quantity\": 1\n    }\n  ],\n  \"paymentType\": \"CASH\",\n  \"amountPaid\": 100.00\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/checkout",
